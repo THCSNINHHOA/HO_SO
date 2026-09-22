@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Drive Explorer - Trường THCS Ninh Hòa</title>
+
+<style>
+/* ============================================================
+   CƠ BẢN
+============================================================ */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f7fa;
+    color: #202124;
+}
+
+/* ============================================================
+   HEADER THEO TRANG CHỦ.html
+============================================================ */
+header {
+    background: linear-gradient(135deg, #0d3b66 0%, #0056b3 50%, #007bff 100%);
+    color: #fff;
+    text-align: center;
+    padding: 35px 20px 30px 20px;
+    box-shadow: 0 6px 20px rgba(0, 64, 133, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%);
+    pointer-events: none;
+}
+
+.header-container {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header .sub-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #d0e1fd;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 4px 16px;
+    border-radius: 30px;
+    backdrop-filter: blur(4px);
+    margin-bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+header .school-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 6px 0 10px 0;
+    color: #ffe066;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+header .main-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 18px;
+    color: #ffffff;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 6px 24px;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+header .week-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    color: #004085;
+    padding: 8px 22px;
+    border-radius: 25px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+    transition: transform 0.2s ease;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+header .week-badge:hover {
+    transform: scale(1.03);
+}
+
+header .week-badge .week-text {
+    font-weight: 700;
+    color: #004085;
+}
+
+header .check-date {
+    margin-top: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #e8f1ff;
+    letter-spacing: 0.3px;
+}
+
+/* ============================================================
+   CONTROL PANEL
+============================================================ */
+.control-panel {
+    background: white;
+    padding: 15px 25px;
+    border-bottom: 1px solid #dadce0;
+}
+
+.control-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+#folderId {
+    flex: 1;
+    min-width: 350px;
+    padding: 10px 12px;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+button {
+    border: none;
+    border-radius: 6px;
+    padding: 10px 15px;
+    cursor: pointer;
+    background: #1a73e8;
+    color: white;
+    font-size: 14px;
+}
+
+button:hover {
+    background: #1557b0;
+}
+
+button.gray {
+    background: #5f6368;
+}
+
+button.gray:hover {
+    background: #3c4043;
+}
+
+button.green {
+    background: #188038;
+}
+
+button.green:hover {
+    background: #137333;
+}
+
+/* ============================================================
+   TRẠNG THÁI KẾT NỐI / RETRY
+============================================================ */
+.connection-status{margin:12px 25px 0;padding:9px 13px;border-radius:6px;font-size:13px;display:none}
+.connection-status.show{display:block}
+.connection-status.info{background:#e8f0fe;color:#1967d2;border:1px solid #c6dafc}
+.connection-status.success{background:#e6f4ea;color:#137333;border:1px solid #b7dfc1}
+.connection-status.warning{background:#fef7e0;color:#8a5a00;border:1px solid #f9e2a1}
+.connection-status.error{background:#fce8e6;color:#c5221f;border:1px solid #f5c2c0}
+.retry-box{padding:18px;text-align:center;color:#5f6368}
+.retry-box button{margin-top:10px}
+
+/* ============================================================
+   SEARCH
+============================================================ */
+.search-panel {
+    margin: 15px 25px 0 25px;
+}
+
+#search {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #dadce0;
+    border-radius: 7px;
+    font-size: 14px;
+}
+
+/* ============================================================
+   TREE CONTAINER
+============================================================ */
+.tree-container {
+    margin: 15px 25px 30px 25px;
+    background: white;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tree-row {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    border-bottom: 1px solid #eeeeee;
+    transition: background 0.1s;
+}
+
+.tree-row:hover {
+    background: #f8f9fa;
+}
+
+.name-column {
+    flex: 1;
+    min-width: 400px;
+    display: flex;
+    align-items: center;
+}
+
+.toggle {
+    width: 25px;
+    height: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: #5f6368;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.toggle:hover {
+    background: #e8eaed;
+    border-radius: 4px;
+}
+
+.toggle.empty {
+    cursor: default;
+}
+
+.item-icon {
+    width: 30px;
+    text-align: center;
+    font-size: 19px;
+    flex-shrink: 0;
+}
+
+.item-name {
+    padding: 0 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.folder-name {
+    font-weight: 600;
+    color: #202124;
+}
+
+.file-name {
+    color: #3c4043;
+}
+
+.item-name a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.item-name a:hover {
+    color: #1a73e8;
+    text-decoration: underline;
+}
+
+.file-count-column {
+    width: 130px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.file-count {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #e8f0fe;
+    color: #1967d2;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.file-count.zero {
+    background: #f1f3f4;
+    color: #80868b;
+}
+
+.type-column {
+    width: 110px;
+    color: #5f6368;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.open-column {
+    width: 110px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.open-drive {
+    color: #1a73e8;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.open-drive:hover {
+    text-decoration: underline;
+}
+
+.children {
+    display: none;
+}
+
+.children.open {
+    display: block;
+}
+
+.root-row {
+    background: #f8f9fa;
+    font-weight: bold;
+}
+
+.loading {
+    padding: 40px;
+    text-align: center;
+    color: #5f6368;
+}
+
+.error {
+    margin: 20px;
+    padding: 15px;
+    background: #fce8e6;
+    border: 1px solid #f5c2c0;
+    color: #c5221f;
+    border-radius: 6px;
+}
+
+.help {
+    margin: 0 25px 25px 25px;
+    padding: 12px 15px;
+    background: #e8f0fe;
+    color: #1967d2;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+/* ============================================================
+   MOBILE RESPONSIVE
+============================================================ */
+@media (max-width: 800px) {
+    .name-column {
+        min-width: 250px;
+    }
+    .type-column {
+        display: none;
+    }
+    .file-count-column {
+        width: 100px;
+    }
+    .open-column {
+        width: 80px;
+    }
+    #summaryTable {
+        table-layout: auto;
+    }
+    #summaryTable .summary-name {
+        width: 30%;
+    }
+    #summaryTable th:nth-child(2) {
+        width: 70%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ============================================================
+     HEADER
+============================================================ -->
+<header>
+    <div class="header-container">
+        <div class="sub-title">
+            <span>🏛️</span> UBND Phường Ninh Hòa
+        </div>
+        <div class="school-name">Trường THCS Ninh Hòa</div>
+        <div class="main-title">Thống kê tiến độ cập nhật kế hoạch bài dạy</div>
+        <div class="week-badge">
+            <span>📅</span>
+            <span class="week-text" id="current-week">Đang tải...</span>
+        </div>
+        <div class="check-date" id="check-date">
+            Ngày kiểm tra: đang cập nhật...
+        </div>
+    </div>
+</header>
+
+<!-- ============================================================
+     CONTROL PANEL
+============================================================ -->
+<div class="control-panel">
+    <div class="control-row">
+        <input type="text" id="folderId" placeholder="Nhập Folder ID...">
+        <button onclick="loadDrive()">🔄 Tải dữ liệu</button>
+        <button class="gray" onclick="openAll()">📂 Mở tất cả</button>
+        <button class="gray" onclick="closeAll()">📁 Đóng tất cả</button>
+        <button class="green" onclick="location.reload()">↻ Làm mới</button>
+    </div>
+</div>
+
+<!-- ============================================================
+     SEARCH
+============================================================ -->
+<div id="connectionStatus" class="connection-status" aria-live="polite"></div>
+
+<div class="search-panel">
+    <input type="text" id="search" placeholder="🔍 Tìm kiếm file hoặc thư mục..." oninput="searchTree()">
+</div>
+
+<!-- ============================================================
+     TREE CONTAINER
+============================================================ -->
+<div id="tree" class="tree-container">
+    <div class="loading">Chưa có dữ liệu.</div>
+</div>
+
+<!-- ============================================================
+     HELP
+============================================================ -->
+<div class="help">
+    💡 Nhấn vào <b>▶</b> để mở thư mục. Nhấn <b>▼</b> để đóng thư mục. Số bên phải là tổng số file trong thư mục, bao gồm cả file trong các thư mục con.
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT TỐI ƯU HÓA TỐC ĐỘ (>1000 MỤC)
+============================================================ -->
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwe_lBA1A7je-mY1Jp4ElDrZ6VRbaef-nbdr02QAGXc0Wn-uBxvu0YhvZ5NDkqg_4yY8A/exec";
+const FOLDER_ID = "1dRWhugvkS2xIgd8XiaFFOoFuzRJbiWf9";
+let driveData = null;
+const loadedFolders = new Map();
+const loadingFolders = new Set();
+
+window.onload = function() {
+    document.getElementById("folderId").value = FOLDER_ID;
+    fetchWithTimeout(WEB_APP_URL + "?warmup=true", 15000).catch(() => {});
+    loadDrive();
+};
+
+const API_TIMEOUT_MS = 45000;
+const MAX_RETRIES = 4;
+const RETRY_DELAYS = [1000, 2000, 4000, 8000];
+const activeRequests = new Map();
+
+function setConnectionStatus(message, type = "info") {
+    const el = document.getElementById("connectionStatus");
+    if (!el) return;
+    el.className = "connection-status show " + type;
+    el.innerHTML = message;
+}
+
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+async function fetchWithTimeout(url, timeoutMs) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const response = await fetch(url, { cache: "no-store", signal: controller.signal });
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        return response;
+    } catch (error) {
+        if (error && error.name === "AbortError") throw new Error("Timeout sau " + Math.round(timeoutMs / 1000) + " giây.");
+        throw error;
+    } finally { clearTimeout(timer); }
+}
+
+async function api(folderId, mode) {
+    const key = mode + ":" + folderId;
+    if (activeRequests.has(key)) return activeRequests.get(key);
+    const promise = (async () => {
+        const url = `${WEB_APP_URL}?folderId=${encodeURIComponent(folderId)}&mode=${encodeURIComponent(mode)}`;
+        let lastError = null;
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                if (attempt > 1) {
+                    setConnectionStatus(`🔄 Kết nối không ổn định. Đang thử lại lần ${attempt}/${MAX_RETRIES}...`, "warning");
+                    await sleep(RETRY_DELAYS[attempt - 2] || 8000);
+                } else setConnectionStatus("⏳ Đang kết nối Google Drive...", "info");
+                const response = await fetchWithTimeout(url, API_TIMEOUT_MS);
+                const result = await response.json();
+                if (!result || result.success !== true) throw new Error((result && result.error) || "Dữ liệu trả về không hợp lệ.");
+                setConnectionStatus("🟢 Google Drive đã kết nối.", "success");
+                setTimeout(() => { const el=document.getElementById("connectionStatus"); if(el&&el.classList.contains("success")){el.className="connection-status";el.innerHTML="";} },1800);
+                return result.data;
+            } catch (error) { lastError = error; }
+        }
+        throw lastError || new Error("Không thể kết nối Google Drive.");
+    })();
+    activeRequests.set(key, promise);
+    try { return await promise; } finally { activeRequests.delete(key); }
+}
+
+async function loadDrive() {
+    const folderId = document.getElementById("folderId").value.trim();
+    if (!folderId) {
+        showError("Bạn chưa nhập Folder ID.");
+        return;
+    }
+
+    driveData = null;
+    loadedFolders.clear();
+    loadingFolders.clear();
+
+    setConnectionStatus("⏳ Đang phân tích cấu trúc thư mục...", "info");
+    document.getElementById("tree").innerHTML = '<div class="loading">⏳ Đang kiểm tra cấu trúc thư mục...</div>';
+
+    try {
+        // Lấy cấp 1 + các thư mục con trực tiếp của cấp 1 để phân biệt:
+        // 1) Cấp 1 là giáo viên
+        // 2) Cấp 1 là môn học, cấp 2 là giáo viên
+        driveData = await api(folderId, "structure");
+        renderTopLevel();
+        setConnectionStatus("🟢 Đã tải cấu trúc. Chọn thư mục để xem toàn bộ cây bên trong.", "success");
+    } catch (error) {
+        showError("Lỗi kết nối: " + error.message);
+    }
+}
+
+function renderTopLevel() {
+    const tree = document.getElementById("tree");
+    const items = (driveData && driveData.children) || [];
+
+    if (!items.length) {
+        tree.innerHTML = '<div class="loading">Không tìm thấy thư mục.</div>';
+        return;
+    }
+
+    tree.innerHTML = items.map(createTopLevelRow).join("");
+}
+
+function createTopLevelRow(folder) {
+    const childrenId = "top_children_" + createSafeId(folder.id);
+    const hasDirectFolders = Array.isArray(folder.children) && folder.children.length > 0;
+
+    // Nếu cấp 1 có các thư mục con trực tiếp, coi các thư mục con này là
+    // ứng viên giáo viên (mô hình Môn học -> Giáo viên).
+    // Nếu không có thư mục con trực tiếp, cấp 1 được xem là giáo viên.
+    const label = hasDirectFolders ? "📚 Môn học / Nhóm" : "👤 Giáo viên";
+
+    return `
+        <div class="tree-item top-item" data-folder-id="${escapeAttribute(folder.id)}">
+            <div class="tree-row root-row" data-name="${escapeAttribute(folder.name)}" data-type="folder">
+                <div class="toggle" onclick="handleTopLevel(event, '${escapeJs(folder.id)}', '${escapeJs(childrenId)}', this)">▶</div>
+                <div class="item-icon">📁</div>
+                <div class="name-column">
+                    <div class="item-name folder-name">
+                        <a href="${escapeAttribute(folder.url || "#")}" target="_blank" onclick="loadFullFolder(event, '${escapeJs(folder.id)}', '${escapeJs(childrenId)}', this.closest('.tree-row').querySelector('.toggle'))">${escapeHtml(folder.name)}</a>
+                    </div>
+                </div>
+                <div class="file-count-column"><span class="file-count zero">${hasDirectFolders ? folder.children.length + " thư mục" : "Chưa tải"}</span></div>
+                <div class="type-column">${label}</div>
+                <div class="open-column">
+                    <a class="open-drive" href="${escapeAttribute(folder.url || "#")}" target="_blank" onclick="event.stopPropagation()">Mở ↗</a>
+                </div>
+            </div>
+            <div id="${childrenId}" class="children"></div>
+        </div>
+    `;
+}
+
+async function handleTopLevel(event, folderId, childrenId, button) {
+    event.stopPropagation();
+    const item = (driveData.children || []).find(x => x.id === folderId);
+    if (!item) return;
+
+    const container = document.getElementById(childrenId);
+    if (!container) return;
+
+    const hasDirectFolders = Array.isArray(item.children) && item.children.length > 0;
+
+    // Cấp 1 có thư mục con: mô hình Môn học -> Giáo viên.
+    // Hiển thị giáo viên cấp 2. Khi bấm giáo viên, tải toàn bộ cây của giáo viên.
+    if (hasDirectFolders) {
+        const isOpen = container.classList.contains("open");
+        if (isOpen) {
+            container.classList.remove("open");
+            button.innerHTML = "▶";
+            return;
+        }
+
+        container.innerHTML = (item.children || []).map(teacher => createTeacherCandidateRow(teacher, 1)).join("");
+        container.classList.add("open");
+        button.innerHTML = "▼";
+        setConnectionStatus("🟢 Đã hiện danh sách giáo viên trong " + escapeHtml(item.name) + ". Chọn giáo viên để tải toàn bộ cây.", "success");
+        return;
+    }
+
+    // Cấp 1 không có thư mục con trực tiếp: đây là giáo viên.
+    await loadFullFolder(event, folderId, childrenId, button);
+}
+
+function createTeacherCandidateRow(folder, level) {
+    const childrenId = "teacher_children_" + createSafeId(folder.id) + "_" + Math.random().toString(36).slice(2);
+    const indent = level * 20;
+
+    return `
+        <div class="tree-item teacher-item">
+            <div class="tree-row" data-name="${escapeAttribute(folder.name)}" data-type="folder" style="padding-left:${indent}px;">
+                <div class="toggle" onclick="loadFullFolder(event, '${escapeJs(folder.id)}', '${escapeJs(childrenId)}', this)">▶</div>
+                <div class="item-icon">👤</div>
+                <div class="name-column">
+                    <div class="item-name folder-name">
+                        <a href="${escapeAttribute(folder.url || "#")}" target="_blank" onclick="loadFullFolder(event, '${escapeJs(folder.id)}', '${escapeJs(childrenId)}', this.closest('.tree-row').querySelector('.toggle'))">${escapeHtml(folder.name)}</a>
+                    </div>
+                </div>
+                <div class="file-count-column"><span class="file-count zero">Chưa tải</span></div>
+                <div class="type-column">Giáo viên</div>
+                <div class="open-column">
+                    <a class="open-drive" href="${escapeAttribute(folder.url || "#")}" target="_blank" onclick="event.stopPropagation()">Mở ↗</a>
+                </div>
+            </div>
+            <div id="${childrenId}" class="children"></div>
+        </div>
+    `;
+}
+
+async function loadFullFolder(event, folderId, childrenId, button) {
+    if (event) event.stopPropagation();
+    const container = document.getElementById(childrenId);
+    if (!container) return;
+    if (loadedFolders.has(folderId)) {
+        const isOpen = container.classList.contains("open");
+        container.classList.toggle("open", !isOpen);
+        button.innerHTML = isOpen ? "▶" : "▼";
+        return;
+    }
+    if (loadingFolders.has(folderId)) return;
+    loadingFolders.add(folderId);
+    button.innerHTML = "⏳";
+    container.innerHTML = '<div class="loading">⏳ Đang tải toàn bộ cây thư mục...</div>';
+    container.classList.add("open");
+    setConnectionStatus("⏳ Đang tải toàn bộ thư mục giáo viên...", "info");
+    try {
+        // Giữ nguyên: một request FULL lấy toàn bộ cây giáo viên.
+        const data = await api(folderId, "full");
+        loadedFolders.set(folderId, data);
+        container.innerHTML = (data.children || []).map(item => item.type === "folder" ? createFolderHTML(item, 1) : createFileHTML(item, 1)).join("");
+        container.classList.add("open");
+        openAllInside(container);
+        button.innerHTML = "▼";
+        setConnectionStatus("🟢 Đã tải toàn bộ cây thư mục của " + escapeHtml(data.name || "giáo viên") + ".", "success");
+    } catch (error) {
+        container.classList.add("open");
+        container.innerHTML = `<div class="retry-box">❌ Không tải được thư mục.<br><small>${escapeHtml(error.message || "Lỗi kết nối Google Drive.")}</small><br><button class="gray" onclick="retryLoadFolder(event, '${escapeJs(folderId)}', '${escapeJs(childrenId)}', this)">🔄 Thử lại</button></div>`;
+        button.innerHTML = "▶";
+        setConnectionStatus("🔴 Không thể tải thư mục sau " + MAX_RETRIES + " lần thử. Bạn có thể bấm Thử lại.", "error");
+    } finally { loadingFolders.delete(folderId); }
+}
+
+async function retryLoadFolder(event, folderId, childrenId, retryButton) {
+    if (event) event.stopPropagation();
+    loadedFolders.delete(folderId);
+    const container = document.getElementById(childrenId);
+    const button = container && container.previousElementSibling ? container.previousElementSibling.querySelector(".toggle") : retryButton;
+    await loadFullFolder(event, folderId, childrenId, button);
+}
+
+function createFolderHTML(folder, level) {
+    const indent = level * 20;
+    const childrenId = "children_" + createSafeId(folder.id) + "_" + Math.random().toString(36).slice(2);
+    const hasChildren = folder.children && folder.children.length > 0;
+
+    let html = `<div class="tree-item">`;
+    html += `<div class="tree-row" data-name="${escapeAttribute(folder.name)}" data-type="folder" style="padding-left:${indent}px;">`;
+    html += hasChildren
+        ? `<div class="toggle" onclick="toggleFolder('${escapeJs(childrenId)}', this)">▶</div>`
+        : `<div class="toggle empty"></div>`;
+    html += `<div class="item-icon">📁</div>`;
+    html += `<div class="name-column"><div class="item-name folder-name"><a href="${escapeAttribute(folder.url || "#")}" target="_blank">${escapeHtml(folder.name)}</a></div></div>`;
+    html += `<div class="file-count-column">${createFileCountHTML(folder.fileCount)}</div>`;
+    html += `<div class="type-column">Thư mục</div>`;
+    html += `<div class="open-column"><a class="open-drive" href="${escapeAttribute(folder.url || "#")}" target="_blank">Mở ↗</a></div>`;
+    html += `</div>`;
+    if (hasChildren) {
+        html += `<div id="${childrenId}" class="children">`;
+        html += folder.children.map(item => item.type === "folder" ? createFolderHTML(item, level + 1) : createFileHTML(item, level + 1)).join("");
+        html += `</div>`;
+    }
+    html += `</div>`;
+    return html;
+}
+
+function createFileHTML(file, level) {
+    const indent = level * 20;
+    return `<div class="tree-item"><div class="tree-row" data-name="${escapeAttribute(file.name)}" data-type="file" style="padding-left:${indent}px;"><div class="toggle empty"></div><div class="item-icon">${getFileIcon(file.mimeType)}</div><div class="name-column"><div class="item-name file-name"><a href="${escapeAttribute(file.url || "#")}" target="_blank">${escapeHtml(file.name)}</a></div></div><div class="file-count-column"></div><div class="type-column">${getFileType(file.mimeType)}</div><div class="open-column"><a class="open-drive" href="${escapeAttribute(file.url || "#")}" target="_blank">Mở ↗</a></div></div></div>`;
+}
+
+function createFileCountHTML(count) {
+    count = Number(count) || 0;
+    return count === 0 ? '<span class="file-count zero">0 file</span>' : `<span class="file-count">${count} file</span>`;
+}
+function getFileIcon(mimeType) {
+    if (!mimeType) return "📄";
+    if (mimeType.includes("pdf")) return "📕";
+    if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) return "📊";
+    if (mimeType.includes("document") || mimeType.includes("word")) return "📝";
+    if (mimeType.includes("presentation")) return "📽️";
+    if (mimeType.includes("image")) return "🖼️";
+    if (mimeType.includes("video")) return "🎬";
+    if (mimeType.includes("audio")) return "🎵";
+    return "📄";
+}
+function getFileType(mimeType) {
+    if (!mimeType) return "Tập tin";
+    if (mimeType.includes("pdf")) return "PDF";
+    if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) return "Excel";
+    if (mimeType.includes("document") || mimeType.includes("word")) return "Word";
+    if (mimeType.includes("presentation")) return "PowerPoint";
+    if (mimeType.includes("image")) return "Hình ảnh";
+    return "Tập tin";
+}
+function toggleFolder(childrenId, button) {
+    const element = document.getElementById(childrenId);
+    if (!element) return;
+    const isOpen = element.classList.contains("open");
+    element.classList.toggle("open", !isOpen);
+    button.innerHTML = isOpen ? "▶" : "▼";
+}
+
+// Mở toàn bộ các nhánh bên trong một giáo viên cùng lúc.
+function openAllInside(container) {
+    if (!container) return;
+    container.querySelectorAll(".children").forEach(el => el.classList.add("open"));
+    container.querySelectorAll(".toggle:not(.empty)").forEach(el => {
+        if (el.innerHTML !== "⏳") el.innerHTML = "▼";
+    });
+}
+function openAll() {
+    document.querySelectorAll(".children").forEach(el => el.classList.add("open"));
+    document.querySelectorAll(".toggle:not(.empty)").forEach(el => { if (el.innerHTML !== "⏳") el.innerHTML = "▼"; });
+}
+function closeAll() {
+    document.querySelectorAll(".children").forEach(el => el.classList.remove("open"));
+    document.querySelectorAll(".toggle:not(.empty)").forEach(el => { if (el.innerHTML !== "⏳") el.innerHTML = "▶"; });
+}
+let searchTimeout;
+function searchTree() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const keyword = document.getElementById("search").value.toLowerCase().trim();
+        const rows = document.querySelectorAll(".tree-row");
+        if (!keyword) { rows.forEach(row => row.style.display = ""); return; }
+        rows.forEach(row => {
+            const name = (row.dataset.name || "").toLowerCase();
+            if (name.includes(keyword)) {
+                row.style.display = "flex";
+                let parent = row.parentElement;
+                while (parent) {
+                    if (parent.classList && parent.classList.contains("children")) {
+                        parent.classList.add("open");
+                        const prev = parent.previousElementSibling;
+                        if (prev) { const toggle = prev.querySelector(".toggle"); if (toggle) toggle.innerHTML = "▼"; }
+                    }
+                    parent = parent.parentElement;
+                }
+            } else row.style.display = "none";
+        });
+    }, 300);
+}
+function showError(message) {
+    document.getElementById("status").innerHTML = `<div class="error">❌ ${escapeHtml(message)}</div>`;
+    document.getElementById("tree").innerHTML = "";
+}
+function createSafeId(text) { return String(text).replace(/[^a-zA-Z0-9_-]/g, "_"); }
+function escapeHtml(text) { if (text === null || text === undefined) return ""; return String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;"); }
+function escapeAttribute(text) { return escapeHtml(text); }
+function escapeJs(text) { return String(text).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\r/g,"\\r").replace(/\n/g,"\\n"); }
+</script>
+
+<!-- ============================================================
+     XỬ LÝ NGÀY VÀ TUẦN HỌC (2026-2027)
+============================================================ -->
+<script>
+const checkDateDisplay = document.getElementById("check-date");
+if (checkDateDisplay) {
+    const now = new Date();
+    checkDateDisplay.innerText = "Ngày kiểm tra: " + now.toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+    });
+}
+
+const schedule = [
+    { week: "01", start: "2026-09-07", end: "2026-09-12" },
+    { week: "02", start: "2026-09-14", end: "2026-09-19" },
+    { week: "03", start: "2026-09-21", end: "2026-09-26" },
+    { week: "04", start: "2026-09-28", end: "2026-10-03" },
+    { week: "05", start: "2026-10-05", end: "2026-10-10" },
+    { week: "06", start: "2026-10-12", end: "2026-10-17" },
+    { week: "07", start: "2026-10-19", end: "2026-10-24" },
+    { week: "08", start: "2026-10-26", end: "2026-10-31" },
+    { week: "09", start: "2026-11-02", end: "2026-11-07" },
+    { week: "10", start: "2026-11-09", end: "2026-11-14" },
+    { week: "11", start: "2026-11-16", end: "2026-11-21" },
+    { week: "12", start: "2026-11-23", end: "2026-11-28" },
+    { week: "13", start: "2026-11-30", end: "2026-12-05" },
+    { week: "14", start: "2026-12-07", end: "2026-12-12" },
+    { week: "15", start: "2026-12-14", end: "2026-12-19" },
+    { week: "16", start: "2026-12-21", end: "2026-12-26" },
+    { week: "17", start: "2026-12-28", end: "2027-01-02" },
+    { week: "18", start: "2027-01-04", end: "2027-01-09" },
+    { week: "dự trữ", start: "2027-01-11", end: "2027-01-16" },
+    { week: "19", start: "2027-01-18", end: "2027-01-23" },
+    { week: "20", start: "2027-01-25", end: "2027-01-30" },
+    { week: "21", start: "2027-02-01", end: "2027-02-13" },
+    { week: "22", start: "2027-02-15", end: "2027-02-20" },
+    { week: "23", start: "2027-02-22", end: "2027-02-27" },
+    { week: "24", start: "2027-03-01", end: "2027-03-06" },
+    { week: "25", start: "2027-03-08", end: "2027-03-13" },
+    { week: "26", start: "2027-03-15", end: "2027-03-20" },
+    { week: "27", start: "2027-03-22", end: "2027-03-27" },
+    { week: "28", start: "2027-03-29", end: "2027-04-03" },
+    { week: "29", start: "2027-04-05", end: "2027-04-10" },
+    { week: "30", start: "2027-04-12", end: "2027-04-17" },
+    { week: "31", start: "2027-04-19", end: "2027-04-24" },
+    { week: "32", start: "2027-04-26", end: "2027-05-01" },
+    { week: "33", start: "2027-05-03", end: "2027-05-08" },
+    { week: "34", start: "2027-05-10", end: "2027-05-15" },
+    { week: "35", start: "2027-05-17", end: "2027-05-22" },
+    { week: "dự trữ", start: "2027-05-24", end: "2027-05-29" }
+];
+
+function formatDate(dateStr) {
+    const parts = dateStr.split('-');
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
+
+function getCurrentWeekInfo() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let item of schedule) {
+        const startDate = new Date(item.start + 'T00:00:00');
+        const endDate = new Date(item.end + 'T23:59:59');
+
+        if (today >= startDate && today <= endDate) {
+            return { week: item.week, start: item.start, end: item.end };
+        }
+    }
+    return null;
+}
+
+const weekInfo = getCurrentWeekInfo();
+const weekDisplay = document.getElementById("current-week");
+
+if (weekInfo) {
+    let weekNumber = weekInfo.week;
+    let weekText = weekNumber === "dự trữ" 
+        ? `TUẦN DỰ TRỮ (${formatDate(weekInfo.start)} - ${formatDate(weekInfo.end)}), NĂM HỌC 2026-2027`
+        : `TUẦN THỨ ${weekNumber} (${formatDate(weekInfo.start)} - ${formatDate(weekInfo.end)}), NĂM HỌC 2026-2027`;
+    weekDisplay.innerText = weekText;
+} else {
+    weekDisplay.innerText = `TUẦN THỨ 01 (07/09/2026 - 12/09/2026), NĂM HỌC 2026-2027`;
+}
+</script>
+
+</body>
+</html>
