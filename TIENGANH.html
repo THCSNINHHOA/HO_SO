@@ -895,7 +895,7 @@ button.green:hover { background: #137333; }
 ============================================================ -->
 <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwe_lBA1A7je-mY1Jp4ElDrZ6VRbaef-nbdr02QAGXc0Wn-uBxvu0YhvZ5NDkqg_4yY8A/exec";
-const FOLDER_ID = "1bpq1JJb-aExIb0WrEss8TtAr9xHxa1gg";
+const FOLDER_ID = "1oG6zBTk0fXJUVZ2kLkwt26RYBfi7ljGk";
 let driveData = null;
 const loadedFolders = new Map();
 const loadingFolders = new Set();
@@ -992,7 +992,7 @@ async function loadDrive() {
     try {
         driveData = await api(folderId, "structure");
         renderTopLevel();
-        setConnectionStatus("🟢 Đã tải cấu trúc. Chọn thư mục để xem toàn bộ cây bên trong.", "success");
+        setConnectionStatus("🟢 Đã tải cấu trúc. Chọn giáo viên để xem toàn bộ cây bên trong.", "success");
     } catch (error) {
         showError("Lỗi kết nối: " + error.message);
     }
@@ -1010,23 +1010,27 @@ function renderTopLevel() {
     tree.innerHTML = items.map(createTopLevelRow).join("");
 }
 
+/**
+ * ============================================================
+ * ĐÃ SỬA: Cấp 1 LUÔN là GIÁO VIÊN (không phân biệt có thư mục con hay không)
+ * ============================================================
+ */
 function createTopLevelRow(folder) {
     const childrenId = "top_children_" + createSafeId(folder.id);
     const hasDirectFolders = Array.isArray(folder.children) && folder.children.length > 0;
-    const label = hasDirectFolders ? "📚 Môn học / Nhóm" : "👤 Giáo viên";
 
     return `
         <div class="tree-item top-item" data-folder-id="${escapeAttribute(folder.id)}">
             <div class="tree-row root-row" data-name="${escapeAttribute(folder.name)}" data-type="folder">
                 <div class="toggle" onclick="handleTopLevel(event, '${escapeJs(folder.id)}', '${escapeJs(childrenId)}', this)">▶</div>
-                <div class="item-icon">📁</div>
+                <div class="item-icon">👤</div>
                 <div class="name-column">
                     <div class="item-name folder-name">
                         <a href="${escapeAttribute(folder.url || "#")}" target="_blank" onclick="loadFullFolder(event, '${escapeJs(folder.id)}', '${escapeJs(childrenId)}', this.closest('.tree-row').querySelector('.toggle'))">${escapeHtml(folder.name)}</a>
                     </div>
                 </div>
-                <div class="file-count-column"><span class="file-count zero">${hasDirectFolders ? folder.children.length + " thư mục" : "Chưa tải"}</span></div>
-                <div class="type-column">${label}</div>
+                <div class="file-count-column"><span class="file-count zero">${hasDirectFolders ? folder.children.length + " môn" : "Chưa tải"}</span></div>
+                <div class="type-column">👤 Giáo viên</div>
                 <div class="open-column">
                     <a class="open-drive" href="${escapeAttribute(folder.url || "#")}" target="_blank" onclick="event.stopPropagation()">Mở ↗</a>
                 </div>
@@ -1036,31 +1040,14 @@ function createTopLevelRow(folder) {
     `;
 }
 
+/**
+ * ============================================================
+ * ĐÃ SỬA: Luôn tải toàn bộ cây thư mục giáo viên khi bấm vào
+ * (bỏ nhánh "nếu có thư mục con thì chỉ hiện danh sách cấp 2")
+ * ============================================================
+ */
 async function handleTopLevel(event, folderId, childrenId, button) {
     event.stopPropagation();
-    const item = (driveData.children || []).find(x => x.id === folderId);
-    if (!item) return;
-
-    const container = document.getElementById(childrenId);
-    if (!container) return;
-
-    const hasDirectFolders = Array.isArray(item.children) && item.children.length > 0;
-
-    if (hasDirectFolders) {
-        const isOpen = container.classList.contains("open");
-        if (isOpen) {
-            container.classList.remove("open");
-            button.innerHTML = "▶";
-            return;
-        }
-
-        container.innerHTML = (item.children || []).map(teacher => createTeacherCandidateRow(teacher, 1)).join("");
-        container.classList.add("open");
-        button.innerHTML = "▼";
-        setConnectionStatus("🟢 Đã hiện danh sách giáo viên trong " + escapeHtml(item.name) + ". Chọn giáo viên để tải toàn bộ cây.", "success");
-        return;
-    }
-
     await loadFullFolder(event, folderId, childrenId, button);
 }
 
@@ -1300,28 +1287,23 @@ function confirmWeekSelection() {
    TÌM FILE THEO TUẦN — NHÓM THEO GIÁO VIÊN
 ============================================================ */
 
+/**
+ * ============================================================
+ * ĐÃ SỬA: Cấp 1 LUÔN là GIÁO VIÊN
+ * Lấy trực tiếp từ driveData.children (cấp 1) — không đoán mò
+ * ============================================================
+ */
 function getTeacherCandidates() {
     const top = (driveData && driveData.children) || [];
     const candidates = [];
 
     top.forEach(item => {
-        const hasDirectFolders = Array.isArray(item.children) && item.children.length > 0;
-
-        if (hasDirectFolders) {
-            item.children.forEach(teacher => {
-                candidates.push({
-                    id: teacher.id,
-                    name: teacher.name || "Không tên",
-                    url: teacher.url || "#"
-                });
-            });
-        } else {
-            candidates.push({
-                id: item.id,
-                name: item.name || "Không tên",
-                url: item.url || "#"
-            });
-        }
+        if (!item.id) return;
+        candidates.push({
+            id: item.id,
+            name: item.name || "Không tên",
+            url: item.url || "#"
+        });
     });
 
     const seen = new Set();
@@ -1413,7 +1395,7 @@ function renderWeekResultsGrouped(orderedGroups, totalTeachers, weekLabelOverrid
             <tr class="${rowClass}">
                 <td class="group-index-cell">${groupIndex}</td>
                 <td class="group-cell" colspan="3">
-                    📁 <b>${escapeHtml(group.name)}</b>
+                    👤 <b>${escapeHtml(group.name)}</b>
                     ${badge}
                     <button class="approve-btn" type="button"
                         onclick="approveTeacherWeek('${escapeJs(group.id)}', this)"
@@ -1497,7 +1479,7 @@ function renderWeekResultsGrouped(orderedGroups, totalTeachers, weekLabelOverrid
             📂 File của ${escapeHtml(weekLabel)}
             <button class="approve-all-btn" type="button" onclick="approveAllWeeks(this)" ${totalFiles === 0 ? "disabled" : ""}>✓ Duyệt tất cả</button>
             <div class="week-results-meta">
-                Tìm thấy <b>${totalFiles}</b> file trong <b>${totalTeachers}</b> thư mục giáo viên —
+                Tìm thấy <b>${totalFiles}</b> file trong <b>${totalTeachers}</b> giáo viên —
                 <b style="color:#137333;">${teachersWithFile}</b> giáo viên có file,
                 <b style="color:#c5221f;">${teachersEmpty}</b> giáo viên chưa có file.
             </div>
@@ -1571,7 +1553,7 @@ function extractWeekNumber(weekLabel) {
 
 /**
  * ============================================================
- * ĐÃ SỬA LẦN 3: Thêm callback onProgress để báo tiến độ realtime
+ * Duyệt file qua POST, chia batch 10 file/request
  * ============================================================
  */
 async function approveFileIds(fileIds, teacherFolderIds, week, onProgress) {
@@ -1690,7 +1672,7 @@ async function approveFileIds(fileIds, teacherFolderIds, week, onProgress) {
 
 /**
  * ============================================================
- * Hàm helper: tạo chuỗi thông báo thống kê duyệt + lock
+ * Tạo chuỗi thông báo thống kê duyệt + lock
  * ============================================================
  */
 function buildApprovalSummary(result, teacherName) {
@@ -1954,12 +1936,8 @@ async function approveAllWeeks(button) {
 
 /**
  * ============================================================
- * CHẠY SONG SONG CÓ GIỚI HẠN + BÁO TIẾN ĐỘ
+ * Chạy song song có giới hạn + báo tiến độ
  * ============================================================
- * @param {Array<Function>} tasks - mảng hàm async
- * @param {number} limit - số task chạy song song tối đa
- * @param {Function} [onTaskDone] - callback({index, doneCount, total, okCount, errCount, result}) sau mỗi task xong
- * @returns {Promise<Array>} mảng kết quả theo đúng thứ tự tasks
  */
 async function runLimited(tasks, limit, onTaskDone) {
     const results = new Array(tasks.length);
@@ -2046,7 +2024,6 @@ async function openAll(weekNumberArg) {
 
     const weekLabel = "TUẦN " + weekNumber;
 
-    // ⭐ Hiển thị progress bar + placeholder khi đang tìm
     box.innerHTML = `
         <div class="week-results-header">
             📂 File của ${escapeHtml(weekLabel)}
@@ -2087,7 +2064,6 @@ async function openAll(weekNumberArg) {
         };
     });
 
-    // ⭐ Truyền callback để cập nhật tiến độ realtime
     const responses = await runLimited(tasks, 3, function(progress) {
         const teacher = candidates[progress.index];
         updateSearchProgress({
@@ -2132,7 +2108,6 @@ async function openAll(weekNumberArg) {
     const orderedGroups = Array.from(groupsById.values())
         .sort((a, b) => a.name.localeCompare(b.name, "vi"));
 
-    // ⭐ Render bảng kết quả (thay thế box.innerHTML → progress tự biến mất)
     renderWeekResultsGrouped(orderedGroups, candidates.length, weekLabel, failedFolderIds);
 
     let totalFiles = 0;
