@@ -1,0 +1,4072 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d3b66">
+<title>Google Drive Explorer - Trường THCS Ninh Hòa</title>
+
+<style>
+/* ============================================================
+   CƠ BẢN
+============================================================ */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f7fa;
+    color: #202124;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* ============================================================
+   HEADER
+============================================================ */
+header {
+    background: linear-gradient(135deg, #0d3b66 0%, #0056b3 50%, #007bff 100%);
+    color: #fff;
+    text-align: center;
+    padding: 35px 20px 30px 20px;
+    box-shadow: 0 6px 20px rgba(0, 64, 133, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%);
+    pointer-events: none;
+}
+
+.header-container {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header .sub-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #d0e1fd;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 4px 16px;
+    border-radius: 30px;
+    backdrop-filter: blur(4px);
+    margin-bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+header .school-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 6px 0 10px 0;
+    color: #ffe066;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+header .main-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 18px;
+    color: #ffffff;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 6px 24px;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+header .week-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    color: #004085;
+    padding: 8px 22px;
+    border-radius: 25px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+    transition: transform 0.2s ease;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+header .week-badge:hover { transform: scale(1.03); }
+header .week-badge .week-text { font-weight: 700; color: #004085; }
+
+header .check-date {
+    margin-top: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #e8f1ff;
+    letter-spacing: 0.3px;
+    line-height: 1.7;
+}
+
+header .check-user {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    margin-right: 6px;
+}
+
+header .check-user .user-icon { margin-right: 4px; }
+
+/* ============================================================
+   CONTROL PANEL
+============================================================ */
+.control-panel {
+    background: white;
+    padding: 15px 25px;
+    border-bottom: 1px solid #dadce0;
+}
+
+.control-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+#folderId {
+    flex: 1;
+    min-width: 350px;
+    padding: 10px 12px;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+button {
+    border: none;
+    border-radius: 6px;
+    padding: 10px 15px;
+    cursor: pointer;
+    background: #1a73e8;
+    color: white;
+    font-size: 14px;
+}
+
+button:hover { background: #1557b0; }
+button.gray { background: #5f6368; }
+button.gray:hover { background: #3c4043; }
+button.green { background: #188038; }
+button.green:hover { background: #137333; }
+
+button.logout-btn {
+    background: #c5221f;
+    color: #fff;
+    font-weight: 600;
+}
+button.logout-btn:hover { background: #a01a18; }
+
+/* ============================================================
+   MODAL CHỌN TUẦN
+============================================================ */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.15s ease;
+}
+
+.modal-overlay.show { display: flex; }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 26px 28px 22px 28px;
+    width: 440px;
+    max-width: 92vw;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    animation: popIn 0.18s ease;
+    max-height: 92vh;
+    overflow-y: auto;
+}
+
+@keyframes popIn {
+    from { transform: scale(0.94); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #202124;
+    margin: 0 0 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-subtitle {
+    font-size: 13px;
+    color: #5f6368;
+    margin-bottom: 18px;
+    line-height: 1.5;
+}
+
+.modal-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #5f6368;
+    margin-bottom: 7px;
+}
+
+.modal-week-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    font-size: 16px;
+    text-align: center;
+    font-weight: 700;
+    color: #1a73e8;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.modal-week-input:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.18);
+}
+
+.modal-error {
+    color: #c5221f;
+    font-size: 13px;
+    margin-top: 10px;
+    min-height: 18px;
+    display: none;
+}
+
+.modal-error.show { display: block; }
+
+.modal-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 14px;
+}
+
+.modal-quick button {
+    background: #e8f0fe;
+    color: #1967d2;
+    font-size: 12.5px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.modal-quick button:hover { background: #d2e3fc; }
+.modal-quick button.current { background: #1a73e8; color: #fff; }
+
+/* ============================================================
+   CHỌN PHƯƠNG ÁN QUÉT
+============================================================ */
+.modal-scan-mode {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid #e8eaed;
+}
+
+.scan-mode-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.scan-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 13px;
+    border: 1.5px solid #dadce0;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    background: #fff;
+}
+
+.scan-option:hover {
+    background: #f8f9fa;
+    border-color: #aecbfa;
+}
+
+.scan-option input[type="radio"] {
+    margin-top: 3px;
+    accent-color: #1a73e8;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.scan-option .scan-option-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+}
+
+.scan-option .scan-option-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #202124;
+}
+
+.scan-option .scan-option-desc {
+    font-size: 12px;
+    color: #5f6368;
+    line-height: 1.4;
+}
+
+.scan-option:has(input:checked) {
+    background: #e8f0fe;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.12);
+}
+
+.scan-option:has(input:checked) .scan-option-title {
+    color: #174ea6;
+}
+
+.range-options {
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: #e8f0fe;
+    border: 1px solid #c6dafc;
+    border-radius: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    animation: fadeIn 0.15s ease;
+}
+
+.range-options.hidden { display: none; }
+
+.range-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+    color: #174ea6;
+    font-weight: 600;
+}
+
+.range-row label {
+    width: 90px;
+    flex-shrink: 0;
+}
+
+.range-row input[type="number"] {
+    width: 70px;
+    padding: 7px 8px;
+    border: 1px solid #c6dafc;
+    border-radius: 7px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a73e8;
+    text-align: center;
+    background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.range-row input[type="number"]:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.18);
+}
+
+.range-row .unit {
+    color: #5f6368;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.range-preview {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #174ea6;
+    padding-top: 6px;
+    border-top: 1px dashed #aecbfa;
+    text-align: center;
+}
+
+.range-preview.nearby-warning {
+    color: #8a5a00;
+}
+
+.range-preview.nearby-warning::before {
+    content: "⚠️ ";
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.modal-actions button { min-width: 90px; }
+
+.modal-actions .btn-cancel { background: #f1f3f4; color: #3c4043; }
+.modal-actions .btn-cancel:hover { background: #e8eaed; }
+.modal-actions .btn-ok { background: #1a73e8; }
+.modal-actions .btn-ok:hover { background: #1557b0; }
+
+/* ============================================================
+   TRẠNG THÁI KẾT NỐI
+============================================================ */
+.connection-status{margin:12px 25px 0;padding:9px 13px;border-radius:6px;font-size:13px;display:none}
+.connection-status.show{display:block}
+.connection-status.info{background:#e8f0fe;color:#1967d2;border:1px solid #c6dafc}
+.connection-status.success{background:#e6f4ea;color:#137333;border:1px solid #b7dfc1}
+.connection-status.warning{background:#fef7e0;color:#8a5a00;border:1px solid #f9e2a1}
+.connection-status.error{background:#fce8e6;color:#c5221f;border:1px solid #f5c2c0}
+.retry-box{padding:18px;text-align:center;color:#5f6368}
+.retry-box button{margin-top:10px}
+
+/* ============================================================
+   SEARCH
+============================================================ */
+.search-panel {
+    margin: 15px 25px 0 25px;
+}
+
+#search {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #dadce0;
+    border-radius: 7px;
+    font-size: 14px;
+}
+
+/* ============================================================
+   TREE CONTAINER
+============================================================ */
+.tree-container {
+    margin: 15px 25px 30px 25px;
+    background: white;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tree-row {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    border-bottom: 1px solid #eeeeee;
+    transition: background 0.1s;
+}
+
+.tree-row:hover { background: #f8f9fa; }
+
+.name-column {
+    flex: 1;
+    min-width: 400px;
+    display: flex;
+    align-items: center;
+}
+
+.toggle {
+    width: 25px; height: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: #5f6368;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.toggle:hover { background: #e8eaed; border-radius: 4px; }
+.toggle.empty { cursor: default; }
+
+.item-icon {
+    width: 30px;
+    text-align: center;
+    font-size: 19px;
+    flex-shrink: 0;
+}
+
+.item-name {
+    padding: 0 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.folder-name { font-weight: 600; color: #202124; }
+.file-name { color: #3c4043; }
+
+.item-name a { color: inherit; text-decoration: none; }
+.item-name a:hover { color: #1a73e8; text-decoration: underline; }
+
+.file-count-column { width: 130px; text-align: center; flex-shrink: 0; }
+
+.file-count {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #e8f0fe;
+    color: #1967d2;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.file-count.zero { background: #f1f3f4; color: #80868b; }
+
+.date-column {
+    width: 120px;
+    color: #5f6368;
+    font-size: 12px;
+    flex-shrink: 0;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.type-column { width: 110px; color: #5f6368; font-size: 13px; flex-shrink: 0; }
+.open-column { width: 110px; text-align: center; flex-shrink: 0; }
+
+.open-drive { color: #1a73e8; text-decoration: none; font-size: 13px; }
+.open-drive:hover { text-decoration: underline; }
+
+.children { display: none; }
+.children.open { display: block; }
+
+.root-row { background: #f8f9fa; font-weight: bold; }
+
+.loading { padding: 40px; text-align: center; color: #5f6368; }
+
+.error {
+    margin: 20px;
+    padding: 15px;
+    background: #fce8e6;
+    border: 1px solid #f5c2c0;
+    color: #c5221f;
+    border-radius: 6px;
+}
+
+.help {
+    margin: 0 25px 25px 25px;
+    padding: 12px 15px;
+    background: #e8f0fe;
+    color: #1967d2;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+/* File [skip] trong cây thư mục */
+.tree-row.skip-file-row {
+    background: #f8f9fa;
+}
+.tree-row.skip-file-row:hover {
+    background: #f1f3f4;
+}
+.tree-row.skip-file-row .item-name a {
+    color: #5f6368;
+    font-style: italic;
+}
+.tree-row.skip-file-row .skip-note {
+    margin-left: 8px;
+    padding: 2px 8px;
+    background: #f1f3f4;
+    color: #5f6368;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 10px;
+    border: 1px solid #dadce0;
+}
+
+/* ============================================================
+   KẾT QUẢ FILE THEO TUẦN
+============================================================ */
+.week-results {
+    margin: 15px 25px 30px 25px;
+    background: #fff;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.week-results-header {
+    padding: 14px 16px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dadce0;
+    font-weight: 600;
+    color: #202124;
+}
+
+.week-results-meta {
+    font-size: 13px;
+    font-weight: normal;
+    color: #5f6368;
+    margin-top: 4px;
+    line-height: 1.5;
+}
+
+.week-results-meta .scan-badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    margin-right: 6px;
+    vertical-align: 1px;
+}
+
+.week-results-meta .scan-badge.range {
+    background: #e8f0fe;
+    color: #174ea6;
+}
+
+.week-results-meta .scan-badge.deep {
+    background: #e6f4ea;
+    color: #137333;
+}
+
+.week-results table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+
+.week-results th,
+.week-results td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eeeeee;
+    text-align: left;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.week-results th {
+    background: #f8f9fa;
+    color: #5f6368;
+    font-size: 13px;
+}
+
+.week-results td { font-size: 14px; }
+.week-results tr:hover td { background: #f8f9fa; }
+
+.week-results .file-col {
+    width: auto;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+.week-results .date-col {
+    width: 110px;
+    text-align: center;
+    color: #5f6368;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.week-results .action-col {
+    width: 90px;
+    text-align: center;
+}
+
+.week-results .approve-btn {
+    border: 1px solid #188038;
+    background: #e6f4ea;
+    color: #137333;
+    border-radius: 5px;
+    padding: 5px 9px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 5px;
+}
+.week-results .approve-btn:hover { background: #ceead6; }
+.week-results .approve-btn:disabled { opacity: .65; cursor: wait; }
+
+.week-results .open-folder-btn {
+    display: inline-block;
+    border: 1px solid #1a73e8;
+    background: #e8f0fe;
+    color: #174ea6;
+    border-radius: 5px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 6px;
+    text-decoration: none;
+}
+.week-results .open-folder-btn:hover { background: #d2e3fc; }
+
+.week-results .approve-all-btn {
+    border: 1px solid #188038;
+    background: #188038;
+    color: #fff;
+    border-radius: 6px;
+    padding: 7px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    float: right;
+}
+.week-results .approve-all-btn:hover { background: #137333; }
+.week-results .approve-all-btn:disabled { opacity: .65; cursor: wait; }
+
+/* ============================================================
+   PROGRESS BAR
+============================================================ */
+.week-results .approve-progress {
+    display: none;
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: #e8f0fe;
+    border: 1px solid #c6dafc;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #174ea6;
+    clear: both;
+}
+
+.week-results .approve-progress.show { display: block; }
+
+.week-results .approve-progress.done {
+    background: #e6f4ea;
+    border-color: #b7dfc1;
+    color: #137333;
+}
+
+.week-results .approve-progress.has-error {
+    background: #fef7e0;
+    border-color: #f9e2a1;
+    color: #8a5a00;
+}
+
+.week-results .approve-progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #d2e3fc;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 8px 0 6px 0;
+    position: relative;
+}
+
+.week-results .approve-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #1a73e8, #4285f4);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.week-results .approve-progress.done .approve-progress-fill {
+    background: linear-gradient(90deg, #137333, #34a853);
+}
+
+.week-results .approve-progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.week-results .approve-progress-stats {
+    font-weight: normal;
+    font-size: 12.5px;
+    opacity: 0.9;
+}
+
+.week-results .search-progress {
+    display: block;
+    margin: 0 0 14px 0;
+    padding: 14px 16px;
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 8px;
+    font-size: 13.5px;
+    color: #8a5a00;
+}
+
+.week-results .search-progress.done {
+    background: #e6f4ea;
+    border-color: #b7dfc1;
+    color: #137333;
+}
+
+.week-results .search-progress.has-error {
+    background: #fef7e0;
+    border-color: #f9e2a1;
+    color: #8a5a00;
+}
+
+.week-results .search-progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #fff3cd;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 8px 0 6px 0;
+    position: relative;
+}
+
+.week-results .search-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #f9ab00, #fbbc04);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.week-results .search-progress.done .search-progress-fill {
+    background: linear-gradient(90deg, #137333, #34a853);
+}
+
+.week-results .search-progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.week-results .search-progress-stats {
+    font-weight: normal;
+    font-size: 12.5px;
+    opacity: 0.9;
+}
+
+.week-results .approved-name { color: #137333; font-weight: 600; }
+.week-results .approved-badge {
+    display: inline-block;
+    margin-left: 7px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: #e6f4ea;
+    color: #137333;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.week-results .week-badge-nearby {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #fef7e0;
+    color: #8a5a00;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid #f9e2a1;
+    white-space: nowrap;
+}
+
+.week-results .empty-result {
+    padding: 28px;
+    text-align: center;
+    color: #5f6368;
+}
+
+.week-results .result-icon { margin-right: 7px; }
+
+/* ============================================================
+   DÒNG GIÁO VIÊN
+============================================================ */
+.week-results .group-row td.group-cell {
+    background: #e8f0fe;
+    color: #174ea6;
+    font-size: 14px;
+    padding: 10px 14px;
+    border-top: 2px solid #c6dafc;
+    border-bottom: 1px solid #c6dafc;
+}
+
+.week-results .group-row:hover td.group-cell { background: #e8f0fe; }
+
+.week-results .group-count {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 10px;
+    border-radius: 20px;
+    background: #1a73e8;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.week-results .group-count.failed { background: #7f1d1d; color: #fff; }
+
+.week-results .group-open {
+    float: right;
+    color: #1a73e8;
+    text-decoration: none;
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.week-results .group-open:hover {
+    background: rgba(26, 115, 232, 0.1);
+    text-decoration: underline;
+}
+
+.week-results .group-index-cell {
+    width: 55px;
+    text-align: center;
+    font-weight: 700;
+    color: #1a73e8;
+    background: #e8f0fe;
+    font-size: 14px;
+    border-top: 2px solid #c6dafc;
+    border-bottom: 1px solid #c6dafc;
+    vertical-align: middle;
+}
+
+.week-results .group-index-empty {
+    width: 55px;
+    background: #fafbff;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.week-results .empty-note-row td {
+    background: #fafafa;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+/* GV LỖI → đỏ đậm */
+.week-results .group-row.group-error td.group-cell {
+    background: #f8d7da;
+    color: #7f1d1d;
+    border-top: 2px solid #e8a5a2;
+    border-bottom: 1px solid #e8a5a2;
+}
+.week-results .group-row.group-error .group-index-cell {
+    background: #e8a5a2;
+    color: #7f1d1d;
+    border-top: 2px solid #d68a87;
+    border-bottom: 1px solid #d68a87;
+}
+.week-results .empty-note-row.empty-note-error td {
+    background: #f8d7da;
+    color: #7f1d1d;
+    border-bottom: 1px solid #e8a5a2;
+}
+
+/* ============================================================
+   ⭐ V28: DÒNG THƯ MỤC CON (folders — mọi cấp)
+============================================================ */
+.week-results .folder-row td.folder-row-cell {
+    font-size: 13.5px;
+    padding: 8px 14px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+/* depth-0 = MÔN: tô xanh đậm */
+.week-results .folder-row.depth-0 td.folder-row-cell {
+    background: #f1f8f4;
+    color: #0d652d;
+    font-weight: 700;
+    padding-left: 28px;
+    border-bottom: 1px solid #ceead6;
+}
+
+/* depth-1 = con của môn */
+.week-results .folder-row.depth-1 td.folder-row-cell {
+    background: #f5fbf7;
+    color: #196c2e;
+    font-weight: 600;
+    padding-left: 48px;
+    border-bottom: 1px solid #d9ead3;
+}
+
+/* depth-2 */
+.week-results .folder-row.depth-2 td.folder-row-cell {
+    background: #fafcfa;
+    color: #2a6b3e;
+    font-weight: 600;
+    padding-left: 68px;
+    border-bottom: 1px solid #e8f0ea;
+}
+
+/* depth-3+ */
+.week-results .folder-row.depth-3 td.folder-row-cell,
+.week-results .folder-row.depth-4 td.folder-row-cell,
+.week-results .folder-row.depth-5 td.folder-row-cell,
+.week-results .folder-row.depth-6 td.folder-row-cell,
+.week-results .folder-row.depth-7 td.folder-row-cell,
+.week-results .folder-row.depth-8 td.folder-row-cell,
+.week-results .folder-row.depth-9 td.folder-row-cell {
+    background: #ffffff;
+    color: #3c4043;
+    font-weight: 500;
+    padding-left: 88px;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+/* ⭐ V28: MÔN thiếu file → đỏ */
+.week-results .folder-row.folder-empty-red td.folder-row-cell {
+    background: #fce8e6 !important;
+    color: #c5221f !important;
+    border-bottom: 1px solid #f5c2c0 !important;
+}
+.week-results .folder-row.folder-empty-red .folder-note {
+    color: #c5221f !important;
+    font-style: italic;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.week-results .folder-row.folder-skipped td.folder-row-cell {
+    background: #f1f3f4 !important;
+    color: #5f6368 !important;
+    border-bottom: 1px solid #dadce0 !important;
+}
+.week-results .folder-row.folder-skipped .folder-note {
+    color: #5f6368 !important;
+    font-style: italic;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+/* ⭐ V28: Thư mục con của môn — nền nhạt, không đánh giá thiếu file */
+.week-results .folder-row.folder-sub-of-subject td.folder-row-cell {
+    background: #fafafa !important;
+    color: #5f6368 !important;
+    border-bottom: 1px solid #f1f3f4 !important;
+    font-weight: 500 !important;
+}
+.week-results .folder-row.folder-sub-of-subject .folder-file-count {
+    color: #5f6368 !important;
+    font-weight: 500 !important;
+}
+.week-results .folder-row.folder-sub-of-subject .folder-note {
+    color: #80868b !important;
+    font-style: italic;
+    font-weight: 500;
+}
+
+.week-results .folder-row .folder-icon { margin-right: 4px; }
+.week-results .folder-row .folder-file-count {
+    margin-left: 8px;
+    font-weight: 600;
+    font-size: 12.5px;
+    color: #137333;
+}
+.week-results .folder-row.folder-empty-red .folder-file-count {
+    color: #c5221f;
+}
+
+.week-results .folder-index-cell {
+    width: 55px;
+    background: transparent;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.week-results .file-row td { background: #fff; }
+.week-results .file-row:hover td { background: #f8f9fa; }
+
+.week-results .file-row.file-under-folder td { background: #fdfdfd; }
+.week-results .file-row.file-under-folder:hover td { background: #f8f9fa; }
+
+.week-results .file-row.file-under-folder .file-col {
+    padding-left: 60px !important;
+}
+
+.week-results .group-row.group-skipped td.group-cell {
+    background: #f1f3f4;
+    color: #5f6368;
+    border-top: 2px solid #dadce0;
+    border-bottom: 1px solid #dadce0;
+}
+.week-results .group-row.group-skipped:hover td.group-cell { background: #f1f3f4; }
+.week-results .group-row.group-skipped .group-index-cell {
+    background: #e8eaed;
+    color: #5f6368;
+    border-top: 2px solid #dadce0;
+    border-bottom: 1px solid #dadce0;
+}
+.week-results .group-count.skipped-badge {
+    background: #5f6368;
+    color: #fff;
+}
+
+/* ============================================================
+   CONTEXT MENU
+============================================================ */
+.context-menu {
+    position: fixed;
+    z-index: 2000;
+    background: #fff;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    padding: 6px 0;
+    min-width: 260px;
+    display: none;
+    animation: fadeIn 0.12s ease;
+}
+
+.context-menu.show { display: block; }
+
+.context-menu .ctx-header {
+    padding: 8px 14px 6px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #5f6368;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid #f1f3f4;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 320px;
+}
+
+.context-menu .ctx-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: #202124;
+    white-space: nowrap;
+}
+
+.context-menu .ctx-item:hover { background: #f1f3f4; }
+.context-menu .ctx-item .ctx-icon { width: 18px; text-align: center; }
+
+.context-menu .ctx-item.ctx-danger { color: #c5221f; }
+.context-menu .ctx-item.ctx-danger:hover { background: #fce8e6; }
+.context-menu .ctx-item.ctx-success { color: #137333; }
+.context-menu .ctx-item.ctx-success:hover { background: #e6f4ea; }
+
+.context-menu .ctx-separator {
+    height: 1px;
+    background: #f1f3f4;
+    margin: 4px 0;
+}
+
+.context-menu .ctx-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.week-results .ctx-target { cursor: context-menu; }
+
+/* ============================================================
+   ⭐ V27: OVERLAY ĐĂNG NHẬP
+============================================================ */
+#loginOverlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #0d3b66 0%, #0056b3 50%, #007bff 100%);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+}
+
+#loginOverlay.hidden { display: none; }
+
+.login-box {
+    background: #fff;
+    border-radius: 14px;
+    padding: 32px 30px 26px 30px;
+    width: 400px;
+    max-width: 100%;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    animation: popIn 0.2s ease;
+}
+
+.login-box .login-logo {
+    text-align: center;
+    font-size: 42px;
+    margin-bottom: 6px;
+}
+
+.login-box .login-title {
+    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0d3b66;
+    margin: 0 0 4px 0;
+}
+
+.login-box .login-subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #5f6368;
+    margin-bottom: 22px;
+    line-height: 1.5;
+}
+
+.login-box .login-field {
+    margin-bottom: 14px;
+    position: relative;
+}
+
+.login-box .login-field label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #5f6368;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.login-box .login-field input {
+    width: 100%;
+    padding: 11px 42px 11px 14px;
+    border: 1.5px solid #dadce0;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    background: #fff;
+}
+
+.login-box .login-field input:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.18);
+}
+
+.login-box .toggle-pass {
+    position: absolute;
+    right: 8px;
+    bottom: 6px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 6px 8px;
+    color: #5f6368;
+    border-radius: 6px;
+    line-height: 1;
+}
+
+.login-box .toggle-pass:hover { background: #f1f3f4; }
+
+.login-box .login-error {
+    color: #c5221f;
+    font-size: 13px;
+    min-height: 18px;
+    margin-top: 6px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.login-box .login-error.show { display: block; }
+
+.login-box .login-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #1a73e8;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: background 0.15s;
+}
+
+.login-box .login-btn:hover:not(:disabled) { background: #1557b0; }
+.login-box .login-btn:disabled { opacity: 0.7; cursor: wait; }
+
+.login-box .login-footer {
+    text-align: center;
+    font-size: 12px;
+    color: #80868b;
+    margin-top: 16px;
+    line-height: 1.5;
+}
+
+/* ============================================================
+   MOBILE (<= 800px)
+============================================================ */
+@media (max-width: 800px) {
+    /* ---------- HEADER ---------- */
+    header { padding: 22px 12px 20px 12px; }
+    .header-container { padding: 0 4px; }
+    header .sub-title {
+        font-size: 0.72rem;
+        letter-spacing: 1px;
+        padding: 3px 12px;
+        margin-bottom: 6px;
+    }
+    header .school-name {
+        font-size: 1.3rem;
+        letter-spacing: 0.5px;
+        margin: 4px 0 8px 0;
+    }
+    header .main-title {
+        font-size: 0.95rem;
+        letter-spacing: 0.5px;
+        white-space: normal;
+        padding: 6px 12px;
+        line-height: 1.35;
+    }
+    header .week-badge {
+        font-size: 0.85rem;
+        padding: 6px 14px;
+        gap: 6px;
+        line-height: 1.4;
+    }
+    header .check-date {
+        font-size: 0.8rem;
+        line-height: 1.55;
+        margin-top: 8px;
+    }
+    header .check-user {
+        font-size: 0.78rem;
+        padding: 3px 10px;
+        margin-bottom: 4px;
+    }
+
+    /* ---------- CONTROL PANEL ---------- */
+    .control-panel { padding: 12px 14px; }
+    .control-row {
+        gap: 8px;
+    }
+    #folderId {
+        flex: 1 1 100%;
+        min-width: 0;
+        font-size: 13px;
+        padding: 9px 10px;
+    }
+    .control-row button {
+        flex: 1 1 calc(50% - 4px);
+        min-width: 0;
+        padding: 10px 8px;
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .control-row button.logout-btn {
+        flex: 1 1 100%;
+    }
+
+    /* ---------- CONNECTION STATUS / SEARCH ---------- */
+    .connection-status {
+        margin: 10px 14px 0;
+        font-size: 12.5px;
+        padding: 8px 11px;
+    }
+    .search-panel { margin: 12px 14px 0 14px; }
+    #search { font-size: 13px; padding: 10px 12px; }
+
+    /* ---------- TREE ---------- */
+    .tree-container {
+        margin: 12px 14px 20px 14px;
+        overflow-x: hidden;
+    }
+    .tree-row {
+        min-height: 44px;
+        flex-wrap: nowrap;
+    }
+    .name-column {
+        min-width: 0;
+        flex: 1 1 auto;
+        overflow: hidden;
+    }
+    .item-name {
+        white-space: normal;
+        word-break: break-word;
+        font-size: 13.5px;
+        line-height: 1.35;
+        padding: 6px 4px;
+    }
+    .item-icon {
+        width: 24px;
+        font-size: 16px;
+    }
+    .toggle { width: 22px; height: 22px; font-size: 11px; }
+
+    .file-count-column {
+        width: 62px;
+        flex-shrink: 0;
+    }
+    .file-count { font-size: 11px; padding: 3px 6px; }
+
+    .date-column,
+    .type-column { display: none; }
+
+    .open-column {
+        width: 54px;
+        flex-shrink: 0;
+    }
+    .open-drive { font-size: 11.5px; }
+
+    /* ---------- HELP ---------- */
+    .help {
+        margin: 0 14px 20px 14px;
+        font-size: 12px;
+        line-height: 1.5;
+        padding: 10px 12px;
+    }
+
+    /* ---------- MODAL ---------- */
+    .modal-overlay { padding: 12px; align-items: flex-start; padding-top: 20px; }
+    .modal-box {
+        width: 100%;
+        max-width: 100%;
+        padding: 20px 18px 18px 18px;
+        border-radius: 12px;
+        max-height: calc(100vh - 40px);
+    }
+    .modal-title { font-size: 1.05rem; }
+    .modal-subtitle { font-size: 12.5px; margin-bottom: 14px; }
+    .modal-week-input { font-size: 15px; padding: 10px 12px; }
+    .modal-quick button { font-size: 12px; padding: 6px 10px; }
+    .scan-option { padding: 10px 11px; }
+    .scan-option .scan-option-title { font-size: 13px; }
+    .scan-option .scan-option-desc { font-size: 11.5px; }
+    .range-options { padding: 10px 12px; }
+    .range-row { font-size: 12.5px; gap: 8px; }
+    .range-row label { width: 72px; font-size: 12px; }
+    .range-row input[type="number"] { width: 60px; font-size: 14px; padding: 6px; }
+    .range-preview { font-size: 12px; }
+    .modal-actions { gap: 8px; margin-top: 18px; }
+    .modal-actions button { flex: 1; min-width: 0; padding: 11px 10px; }
+
+    /* ---------- WEEK RESULTS HEADER ---------- */
+    .week-results {
+        margin: 12px 14px 20px 14px;
+        border-radius: 8px;
+    }
+    .week-results-header {
+        padding: 12px 12px;
+        font-size: 14px;
+    }
+    .week-results-meta {
+        font-size: 12px;
+        line-height: 1.55;
+    }
+    .week-results .approve-all-btn {
+        float: none;
+        display: block;
+        width: 100%;
+        margin-top: 10px;
+        padding: 9px 12px;
+        font-size: 13px;
+    }
+
+    /* ---------- BẢNG KẾT QUẢ: CARD-STACK ---------- */
+    .week-results table,
+    .week-results thead,
+    .week-results tbody,
+    .week-results tr,
+    .week-results th,
+    .week-results td {
+        display: block;
+        width: 100%;
+    }
+    .week-results thead { display: none; }
+
+    .week-results tr {
+        border-bottom: 1px solid #eeeeee;
+        padding: 8px 12px;
+        box-sizing: border-box;
+    }
+
+    /* Dòng giáo viên */
+    .week-results .group-row td.group-index-cell {
+        display: none;
+    }
+    .week-results .group-row td.group-cell {
+        padding: 8px 0 !important;
+        border: none !important;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    .week-results .group-row .group-open {
+        float: none;
+        display: inline-block;
+        margin-top: 6px;
+        padding: 5px 10px;
+        background: rgba(26,115,232,0.08);
+        border-radius: 6px;
+    }
+    .week-results .group-row .approve-btn {
+        display: block;
+        width: 100%;
+        margin: 8px 0 0 0;
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+    .week-results .group-count {
+        font-size: 11.5px;
+        padding: 2px 8px;
+        margin-left: 6px;
+    }
+
+    /* Dòng thư mục con */
+    .week-results .folder-row td.folder-index-cell { display: none; }
+    .week-results .folder-row td.folder-row-cell {
+        padding: 8px 0 !important;
+        font-size: 13px;
+        line-height: 1.5;
+        border: none !important;
+    }
+    .week-results .folder-row.depth-0 td.folder-row-cell { padding-left: 12px !important; }
+    .week-results .folder-row.depth-1 td.folder-row-cell { padding-left: 22px !important; }
+    .week-results .folder-row.depth-2 td.folder-row-cell { padding-left: 32px !important; }
+    .week-results .folder-row.depth-3 td.folder-row-cell,
+    .week-results .folder-row.depth-4 td.folder-row-cell,
+    .week-results .folder-row.depth-5 td.folder-row-cell,
+    .week-results .folder-row.depth-6 td.folder-row-cell,
+    .week-results .folder-row.depth-7 td.folder-row-cell,
+    .week-results .folder-row.depth-8 td.folder-row-cell,
+    .week-results .folder-row.depth-9 td.folder-row-cell { padding-left: 42px !important; }
+
+    .week-results .folder-row .open-folder-btn {
+        display: inline-block;
+        margin: 6px 0 0 0;
+        padding: 5px 10px;
+    }
+
+    /* Dòng file */
+    .week-results .file-row td.group-index-empty { display: none; }
+    .week-results .file-row td.file-col {
+        padding: 8px 0 4px 0 !important;
+        font-size: 13px;
+        line-height: 1.5;
+        word-break: break-word;
+        border: none !important;
+    }
+    .week-results .file-row.file-under-folder .file-col {
+        padding-left: 22px !important;
+    }
+    .week-results .file-row td.date-col {
+        display: inline-block;
+        width: auto;
+        padding: 0 12px 6px 0 !important;
+        text-align: left;
+        font-size: 11.5px;
+        color: #5f6368;
+        border: none !important;
+    }
+    .week-results .file-row td.action-col {
+        display: inline-block;
+        width: auto;
+        padding: 0 0 6px 0 !important;
+        text-align: left;
+        border: none !important;
+    }
+    .week-results .file-row td.date-col::before {
+        content: "📅 ";
+    }
+    .week-results .file-row td.action-col .open-drive {
+        display: inline-block;
+        padding: 3px 8px;
+        background: #e8f0fe;
+        border-radius: 5px;
+        font-size: 11.5px;
+    }
+
+    /* Note rows */
+    .week-results .empty-note-row td {
+        padding: 8px 12px !important;
+        font-size: 12.5px;
+    }
+    .week-results .empty-note-row td:first-child { display: none; }
+
+    /* Progress bars */
+    .week-results .approve-progress,
+    .week-results .search-progress {
+        padding: 10px 12px;
+        font-size: 12.5px;
+    }
+    .week-results .approve-progress-info,
+    .week-results .search-progress-info {
+        font-size: 12.5px;
+    }
+    .week-results .approve-progress-stats,
+    .week-results .search-progress-stats {
+        font-size: 11.5px;
+    }
+
+    /* ---------- LOGIN ---------- */
+    .login-box {
+        padding: 24px 20px 20px 20px;
+        border-radius: 12px;
+    }
+    .login-box .login-logo { font-size: 36px; }
+    .login-box .login-title { font-size: 1.05rem; }
+    .login-box .login-subtitle { font-size: 12.5px; margin-bottom: 18px; }
+    .login-box .login-field input { font-size: 14px; padding: 10px 40px 10px 12px; }
+    .login-box .login-btn { font-size: 14.5px; padding: 11px; }
+
+    /* ---------- CONTEXT MENU ---------- */
+    .context-menu {
+        min-width: 200px;
+        max-width: calc(100vw - 20px);
+    }
+    .context-menu .ctx-header {
+        font-size: 11.5px;
+        max-width: 240px;
+    }
+    .context-menu .ctx-item {
+        padding: 11px 14px;
+        font-size: 13.5px;
+    }
+}
+
+/* ============================================================
+   MOBILE NHỎ (<= 420px)
+============================================================ */
+@media (max-width: 420px) {
+    header .school-name { font-size: 1.1rem; }
+    header .main-title { font-size: 0.85rem; padding: 5px 8px; }
+    header .week-badge { font-size: 0.78rem; padding: 5px 10px; }
+
+    .control-row button {
+        flex: 1 1 100%;
+        font-size: 12.5px;
+    }
+    .control-row button.logout-btn { flex: 1 1 100%; }
+
+    .name-column { min-width: 0; }
+    .item-name { font-size: 13px; }
+
+    .file-count-column { width: 56px; }
+    .open-column { width: 46px; }
+    .open-drive { font-size: 11px; }
+
+    .week-results { margin: 10px 10px 18px 10px; }
+    .week-results-header { padding: 10px 10px; font-size: 13.5px; }
+    .week-results tr { padding: 7px 10px; }
+
+    .modal-box { padding: 18px 14px 16px 14px; }
+    .modal-actions { flex-direction: column-reverse; }
+    .modal-actions button { width: 100%; }
+
+    .login-box { padding: 20px 16px 18px 16px; }
+}
+
+/* ============================================================
+   TABLET (801px - 1100px)
+============================================================ */
+@media (min-width: 801px) and (max-width: 1100px) {
+    .name-column { min-width: 300px; }
+    .week-results .file-col { font-size: 13.5px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ============================================================
+     ⭐ V27: OVERLAY ĐĂNG NHẬP (che toàn màn hình)
+============================================================ -->
+<div id="loginOverlay">
+    <div class="login-box">
+        <div class="login-logo">🔐</div>
+        <h2 class="login-title">Đăng nhập hệ thống</h2>
+        <div class="login-subtitle">
+            Trường THCS Ninh Hòa<br>
+            Thống kê tiến độ cập nhật kế hoạch bài dạy
+        </div>
+
+        <div class="login-field">
+            <label for="loginUsername">Tên đăng nhập</label>
+            <input type="text" id="loginUsername" autocomplete="username" placeholder="Nhập tên đăng nhập...">
+        </div>
+
+        <div class="login-field">
+            <label for="loginPassword">Mật khẩu</label>
+            <input type="password" id="loginPassword" autocomplete="current-password" placeholder="Nhập mật khẩu...">
+            <button type="button" class="toggle-pass" id="togglePassBtn" onclick="togglePasswordVisibility()" title="Hiện/ẩn mật khẩu">👁️</button>
+        </div>
+
+        <div class="login-error" id="loginError"></div>
+
+        <button class="login-btn" id="loginBtn" onclick="doLogin()">🔓 Đăng nhập</button>
+
+        <div class="login-footer">
+            Vui lòng liên hệ quản trị viên nếu quên mật khẩu.
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     HEADER
+============================================================ -->
+<header>
+    <div class="header-container">
+        <div class="sub-title">
+            <span>🏛️</span> UBND Phường Ninh Hòa
+        </div>
+        <div class="school-name">Trường THCS Ninh Hòa</div>
+        <div class="main-title">Thống kê tiến độ cập nhật kế hoạch bài dạy</div>
+        <div class="week-badge">
+            <span>📅</span>
+            <span class="week-text" id="current-week">Đang tải...</span>
+        </div>
+        <div class="check-date" id="check-date">
+            <span id="check-user-label"></span>
+            Ngày kiểm tra: đang cập nhật...
+        </div>
+    </div>
+</header>
+
+<!-- ============================================================
+     CONTROL PANEL
+============================================================ -->
+<div class="control-panel">
+    <div class="control-row">
+        <input type="text" id="folderId" placeholder="Nhập Folder ID...">
+        <button onclick="loadDrive()">🔄 Tải dữ liệu</button>
+        <button class="gray" onclick="openWeekModal()">📂 Tìm file theo tuần</button>
+        <button class="gray" onclick="closeAll()">📁 Đóng tất cả</button>
+        <button class="green" onclick="location.reload()">↻ Làm mới</button>
+        <button class="logout-btn" id="logoutBtn" onclick="doLogout()" style="display:none;">🚪 Đăng xuất</button>
+    </div>
+</div>
+
+<!-- ============================================================
+     SEARCH
+============================================================ -->
+<div id="connectionStatus" class="connection-status" aria-live="polite"></div>
+
+<div class="search-panel">
+    <input type="text" id="search" placeholder="🔍 Tìm kiếm file hoặc thư mục..." oninput="searchTree()">
+</div>
+
+<!-- ============================================================
+     TREE CONTAINER
+============================================================ -->
+<div id="tree" class="tree-container">
+    <div class="loading">Chưa có dữ liệu.</div>
+</div>
+
+<!-- ============================================================
+     HELP
+============================================================ -->
+<div class="help">
+    💡 Nhấn vào <b>▶</b> để mở thư mục. Nhấn <b>▼</b> để đóng thư mục. Nút <b>📂 Tìm file theo tuần</b> cho phép chọn số tuần cần tìm và chế độ quét. <b style="color:#0d652d;">Thư mục môn</b> (cấp 1 trong thư mục GV) được đánh giá: có file → xanh, thiếu file → <b style="color:#c5221f;">đỏ</b>. Các thư mục con của môn chỉ liệt kê file, không đánh giá thiếu. Thư mục bị bỏ qua → <b>xám</b>. Trên máy tính nhấn <b>chuột phải</b>, trên điện thoại <b>nhấn giữ</b> vào dòng giáo viên / thư mục con để <b>bỏ qua</b> hoặc <b>cho phép</b> tìm kiếm.
+</div>
+
+<!-- ============================================================
+     MODAL CHỌN TUẦN
+============================================================ -->
+<div class="modal-overlay" id="weekModal" onclick="if(event.target===this) closeWeekModal()">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="weekModalTitle">
+        <h3 class="modal-title" id="weekModalTitle">
+            <span>📂</span> Tìm file theo tuần
+        </h3>
+        <div class="modal-subtitle">
+            Nhập số tuần cần tìm (từ 1 đến 40). Mặc định là tuần hiện tại theo lịch học 2026–2027.
+        </div>
+
+        <label class="modal-label" for="weekModalInput">Số tuần</label>
+        <input type="number" id="weekModalInput" class="modal-week-input" min="1" max="40" placeholder="VD: 3">
+
+        <div class="modal-quick" id="weekQuickButtons"></div>
+
+        <div class="modal-scan-mode">
+            <label class="modal-label">Chế độ quét</label>
+            <div class="scan-mode-options">
+                <label class="scan-option">
+                    <input type="radio" name="scanMode" value="range" checked>
+                    <span class="scan-option-body">
+                        <span class="scan-option-title">⚡ Quét theo khoảng tuần (nhanh)</span>
+                        <span class="scan-option-desc">Lọc file theo ngày trước, sau đó mới tìm tuần. Nhanh hơn 10–50 lần.</span>
+                    </span>
+                </label>
+                <label class="scan-option">
+                    <input type="radio" name="scanMode" value="deep">
+                    <span class="scan-option-body">
+                        <span class="scan-option-title">🌳 Quét toàn bộ cây</span>
+                        <span class="scan-option-desc">Quét sâu mọi thư mục con, đọc tên mọi file. Chậm hơn nhưng bắt được tất cả file.</span>
+                    </span>
+                </label>
+            </div>
+
+            <div class="range-options" id="rangeOptions">
+                <div class="range-row">
+                    <label for="weekBeforeInput">Quét trước</label>
+                    <input type="number" id="weekBeforeInput" min="0" max="10" value="2" step="1">
+                    <span class="unit">tuần</span>
+                </div>
+                <div class="range-row">
+                    <label for="weekAfterInput">Quét sau</label>
+                    <input type="number" id="weekAfterInput" min="0" max="10" value="2" step="1">
+                    <span class="unit">tuần</span>
+                </div>
+                <div class="range-preview" id="rangePreview">Sẽ quét: Tuần 1 → 5</div>
+            </div>
+        </div>
+
+        <div class="modal-error" id="weekModalError"></div>
+
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeWeekModal()">Hủy</button>
+            <button class="btn-ok" onclick="confirmWeekSelection()">🔍 Tìm kiếm</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     CONTEXT MENU
+============================================================ -->
+<div class="context-menu" id="contextMenu">
+    <div class="ctx-header" id="ctxHeader">Thư mục</div>
+    <div class="ctx-item ctx-danger" id="ctxSkip" onclick="ctxActionSkip()">
+        <span class="ctx-icon">🚫</span>
+        <span>Bỏ qua tìm kiếm</span>
+    </div>
+    <div class="ctx-item ctx-success" id="ctxUnskip" onclick="ctxActionUnskip()">
+        <span class="ctx-icon">✅</span>
+        <span>Cho phép tìm kiếm</span>
+    </div>
+    <div class="ctx-separator"></div>
+    <div class="ctx-item" id="ctxOpen" onclick="ctxActionOpen()">
+        <span class="ctx-icon">📂</span>
+        <span>Mở thư mục trong Drive</span>
+    </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwe_lBA1A7je-mY1Jp4ElDrZ6VRbaef-nbdr02QAGXc0Wn-uBxvu0YhvZ5NDkqg_4yY8A/exec";
+const FOLDER_ID = "1oG6zBTk0fXJUVZ2kLkwt26RYBfi7ljGk";
+let driveData = null;
+const loadedFolders = new Map();
+const loadingFolders = new Set();
+
+/* ============================================================
+ * ⭐ V27: XÁC THỰC ĐĂNG NHẬP
+ * ============================================================ */
+const SESSION_KEY = "gd_user_session";
+let loginFailCount = 0;
+let loginLockUntil = 0;
+
+function getSession() {
+    try {
+        const raw = sessionStorage.getItem(SESSION_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw);
+    } catch (e) {
+        return null;
+    }
+}
+
+function setSession(user) {
+    try {
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    } catch (e) {}
+}
+
+function clearSession() {
+    try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+}
+
+function showLoginOverlay() {
+    const ov = document.getElementById("loginOverlay");
+    if (ov) ov.classList.remove("hidden");
+    const btn = document.getElementById("logoutBtn");
+    if (btn) btn.style.display = "none";
+    setTimeout(() => {
+        const u = document.getElementById("loginUsername");
+        if (u) u.focus();
+    }, 100);
+}
+
+function hideLoginOverlay() {
+    const ov = document.getElementById("loginOverlay");
+    if (ov) ov.classList.add("hidden");
+    const btn = document.getElementById("logoutBtn");
+    if (btn) btn.style.display = "inline-block";
+}
+
+function togglePasswordVisibility() {
+    const input = document.getElementById("loginPassword");
+    const btn = document.getElementById("togglePassBtn");
+    if (!input || !btn) return;
+    if (input.type === "password") {
+        input.type = "text";
+        btn.textContent = "🙈";
+    } else {
+        input.type = "password";
+        btn.textContent = "👁️";
+    }
+}
+
+function setLoginError(msg) {
+    const el = document.getElementById("loginError");
+    if (!el) return;
+    if (msg) {
+        el.textContent = msg;
+        el.classList.add("show");
+    } else {
+        el.textContent = "";
+        el.classList.remove("show");
+    }
+}
+
+async function doLogin() {
+    const btn = document.getElementById("loginBtn");
+    const uEl = document.getElementById("loginUsername");
+    const pEl = document.getElementById("loginPassword");
+
+    // Chống brute-force
+    const now = Date.now();
+    if (loginLockUntil > now) {
+        const sec = Math.ceil((loginLockUntil - now) / 1000);
+        setLoginError(`⛔ Quá nhiều lần sai. Vui lòng thử lại sau ${sec} giây.`);
+        return;
+    }
+
+    const username = (uEl.value || "").trim();
+    const password = pEl.value || "";
+
+    if (!username || !password) {
+        setLoginError("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.");
+        return;
+    }
+
+    setLoginError("");
+    btn.disabled = true;
+    btn.textContent = "⏳ Đang kiểm tra...";
+
+    try {
+        const res = await fetch(WEB_APP_URL, {
+            method: "POST",
+            cache: "no-store",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ mode: "login", username, password })
+        });
+
+        const data = await res.json();
+
+        if (!data || data.success !== true) {
+            throw new Error((data && data.error) || "Đăng nhập thất bại.");
+        }
+
+        const user = data.data || {};
+        setSession({
+            username: user.username || username,
+            displayName: user.displayName || user.username || username,
+            loginAt: Date.now()
+        });
+
+        loginFailCount = 0;
+        loginLockUntil = 0;
+
+        hideLoginOverlay();
+        applyUserToUI();
+        setConnectionStatus("🟢 Đăng nhập thành công. Chào mừng " + escapeHtml(user.displayName || username) + "!", "success");
+
+        // Tự động tải dữ liệu sau khi đăng nhập
+        if (typeof loadDrive === "function") {
+            loadDrive();
+        }
+
+    } catch (error) {
+        loginFailCount++;
+        if (loginFailCount >= 5) {
+            loginLockUntil = Date.now() + 30000;
+            loginFailCount = 0;
+            setLoginError("⛔ Sai quá 5 lần. Tạm khóa 30 giây.");
+        } else {
+            setLoginError("❌ " + (error.message || "Sai tên đăng nhập hoặc mật khẩu.") +
+                          ` (lần ${loginFailCount}/5)`);
+        }
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "🔓 Đăng nhập";
+    }
+}
+
+function doLogout() {
+    if (!confirm("Bạn có chắc muốn đăng xuất?")) return;
+    clearSession();
+    location.reload();
+}
+
+function applyUserToUI() {
+    const s = getSession();
+    const label = document.getElementById("check-user-label");
+    if (!label) return;
+    if (s && s.displayName) {
+        label.innerHTML = `<span class="check-user"><span class="user-icon">👤</span>Người kiểm tra: <b>${escapeHtml(s.displayName)}</b></span> `;
+    } else {
+        label.innerHTML = "";
+    }
+}
+
+function requireLogin() {
+    const s = getSession();
+    if (!s || !s.username) {
+        showLoginOverlay();
+        return false;
+    }
+    hideLoginOverlay();
+    applyUserToUI();
+    return true;
+}
+
+/* ============================================================
+ * KHỞI ĐỘNG
+ * ============================================================ */
+window.onload = function() {
+    document.getElementById("folderId").value = FOLDER_ID;
+    fetchWithTimeout(WEB_APP_URL + "?warmup=true", 15000).catch(() => {});
+
+    // ⭐ Kiểm tra đăng nhập trước
+    if (requireLogin()) {
+        loadDrive();
+    }
+};
+
+let selectedWeekNumber = null;
+let weekApprovalGroups = new Map();
+let currentApprovalWeek = null;
+
+const TEACHER_CONCURRENCY = 8;
+
+let selectedScanMode = "range";
+let selectedWeekBefore = 2;
+let selectedWeekAfter = 2;
+
+let ctxTarget = null;
+
+const DATE_BUFFER_DAYS = 3;
+
+function initWeekInput() {
+    const input = document.getElementById("weekModalInput");
+    if (!input) return;
+    if (typeof weekInfo !== "undefined" && weekInfo && weekInfo.week !== "dự trữ") {
+        input.value = String(weekInfo.week).replace(/^0+/, "") || "";
+        selectedWeekNumber = input.value;
+    }
+}
+
+const API_TIMEOUT_MS = 120000;
+const MAX_RETRIES = 4;
+const RETRY_DELAYS = [1000, 2000, 4000, 8000];
+const activeRequests = new Map();
+
+function setConnectionStatus(message, type = "info") {
+    const el = document.getElementById("connectionStatus");
+    if (!el) return;
+    el.className = "connection-status show " + type;
+    el.innerHTML = message;
+}
+
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+async function fetchWithTimeout(url, timeoutMs) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const response = await fetch(url, { cache: "no-store", signal: controller.signal });
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        return response;
+    } catch (error) {
+        if (error && error.name === "AbortError") throw new Error("Timeout sau " + Math.round(timeoutMs / 1000) + " giây.");
+        throw error;
+    } finally { clearTimeout(timer); }
+}
+
+function computeDateRange(week, before, after) {
+    const target = parseInt(week, 10);
+    if (isNaN(target)) return null;
+    if (typeof schedule === "undefined" || !Array.isArray(schedule)) return null;
+
+    const fromWeek = Math.max(1, target - before);
+    const toWeek = target + after;
+
+    const fromInfo = schedule.find(s => parseInt(s.week, 10) === fromWeek);
+    const toInfo = schedule.find(s => parseInt(s.week, 10) === toWeek);
+
+    if (!fromInfo || !toInfo) return null;
+
+    const fromD = new Date(fromInfo.start + "T00:00:00+07:00");
+    fromD.setDate(fromD.getDate() - DATE_BUFFER_DAYS);
+
+    const toD = new Date(toInfo.end + "T23:59:59+07:00");
+    toD.setDate(toD.getDate() + DATE_BUFFER_DAYS);
+
+    return {
+        fromDate: formatRFC3339(fromD),
+        toDate: formatRFC3339(toD)
+    };
+}
+
+function formatRFC3339(date) {
+    const pad = n => String(n).padStart(2, '0');
+    const y = date.getFullYear();
+    const mo = pad(date.getMonth() + 1);
+    const d = pad(date.getDate());
+    const h = pad(date.getHours());
+    const mi = pad(date.getMinutes());
+    const s = pad(date.getSeconds());
+    return `${y}-${mo}-${d}T${h}:${mi}:${s}+07:00`;
+}
+
+async function api(folderId, mode, week) {
+    const isWeekMode = (mode === "week" || mode === "week-all");
+
+    const key = mode + ":" + folderId + (
+        isWeekMode
+            ? ":" + String(week || "") +
+              ":" + selectedScanMode +
+              (selectedScanMode === "range"
+                  ? ":" + selectedWeekBefore + ":" + selectedWeekAfter
+                  : "")
+            : ""
+    );
+
+    if (activeRequests.has(key)) return activeRequests.get(key);
+
+    const promise = (async () => {
+        let url = `${WEB_APP_URL}?folderId=${encodeURIComponent(folderId)}&mode=${encodeURIComponent(mode)}`;
+        if (isWeekMode && week) {
+            url += `&week=${encodeURIComponent(week)}`;
+            url += `&scanMode=${encodeURIComponent(selectedScanMode)}`;
+            if (selectedScanMode === "range") {
+                url += `&weekBefore=${encodeURIComponent(selectedWeekBefore)}`;
+                url += `&weekAfter=${encodeURIComponent(selectedWeekAfter)}`;
+
+                const range = computeDateRange(week, selectedWeekBefore, selectedWeekAfter);
+                if (range) {
+                    url += `&fromDate=${encodeURIComponent(range.fromDate)}`;
+                    url += `&toDate=${encodeURIComponent(range.toDate)}`;
+                }
+            }
+        }
+        let lastError = null;
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                if (attempt > 1) {
+                    setConnectionStatus(`🔄 Kết nối không ổn định. Đang thử lại lần ${attempt}/${MAX_RETRIES}...`, "warning");
+                    await sleep(RETRY_DELAYS[attempt - 2] || 8000);
+                } else setConnectionStatus("⏳ Đang kết nối Google Drive...", "info");
+                const response = await fetchWithTimeout(url, API_TIMEOUT_MS);
+                const result = await response.json();
+                if (!result || result.success !== true) throw new Error((result && result.error) || "Dữ liệu trả về không hợp lệ.");
+                setConnectionStatus("🟢 Google Drive đã kết nối.", "success");
+                setTimeout(() => { const el=document.getElementById("connectionStatus"); if(el&&el.classList.contains("success")){el.className="connection-status";el.innerHTML="";} },1800);
+                return result.data;
+            } catch (error) { lastError = error; }
+        }
+        throw lastError || new Error("Không thể kết nối Google Drive.");
+    })();
+    activeRequests.set(key, promise);
+    try { return await promise; } finally { activeRequests.delete(key); }
+}
+
+async function apiPost(payload, timeoutMs) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs || 60000);
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: "POST",
+            cache: "no-store",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+        });
+        clearTimeout(timer);
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        const result = await response.json();
+        if (!result || result.success !== true) throw new Error((result && result.error) || "Yêu cầu thất bại.");
+        return result.data;
+    } catch (error) {
+        clearTimeout(timer);
+        if (error && error.name === "AbortError") throw new Error("Timeout khi gọi API.");
+        throw error;
+    }
+}
+
+async function loadDrive() {
+    const folderId = document.getElementById("folderId").value.trim();
+    if (!folderId) {
+        showError("Bạn chưa nhập Folder ID.");
+        return;
+    }
+
+    driveData = null;
+    loadedFolders.clear();
+    loadingFolders.clear();
+
+    setConnectionStatus("⏳ Đang phân tích cấu trúc thư mục...", "info");
+    document.getElementById("tree").innerHTML = '<div class="loading">⏳ Đang kiểm tra cấu trúc thư mục...</div>';
+
+    try {
+        driveData = await api(folderId, "structure");
+        renderTopLevel();
+        const treeType = (driveData && driveData.treeType) || "?";
+        const treeTypeLabel = {
+            "A-direct": "Kiểu A-direct (GV cấp 1, không có Môn)",
+            "A": "Kiểu A (GV cấp 1, có Môn)",
+            "B": "Kiểu B (Tổ cấp 1 → GV cấp 2)",
+            "empty": "Cây rỗng",
+            "unknown": "Không xác định"
+        }[treeType] || treeType;
+        setConnectionStatus(`🟢 Đã tải cấu trúc — <b>${treeTypeLabel}</b>. Chọn thư mục để xem toàn bộ cây.`, "success");
+    } catch (error) {
+        showError("Lỗi kết nối: " + error.message);
+    }
+}
+
+function extractTeacherList(driveData) {
+    const teacherList = [];
+    if (!driveData || !Array.isArray(driveData.children)) return teacherList;
+
+    const treeType = driveData.treeType || "A";
+
+    if (treeType === "B") {
+        driveData.children.forEach(to => {
+            if (!to.children || to.children.length === 0) return;
+            to.children.forEach(gv => {
+                teacherList.push({
+                    id: gv.id,
+                    name: gv.name,
+                    url: gv.url,
+                    toName: to.name
+                });
+            });
+        });
+    } else {
+        driveData.children.forEach(gv => {
+            teacherList.push({
+                id: gv.id,
+                name: gv.name,
+                url: gv.url,
+                toName: null
+            });
+        });
+    }
+
+    return teacherList;
+}
+
+function renderTopLevel() {
+    const tree = document.getElementById("tree");
+    const items = (driveData && driveData.children) || [];
+
+    if (!items.length) {
+        tree.innerHTML = '<div class="loading">Không tìm thấy thư mục.</div>';
+        return;
+    }
+
+    const treeType = (driveData && driveData.treeType) || "A";
+
+    tree.innerHTML = items.map(folder => createTopLevelRow(folder, treeType)).join("");
+}
+
+function createTopLevelRow(folder, treeType) {
+    const childrenId = "top_children_" + createSafeId(folder.id);
+    const hasDirectFolders = Array.isArray(folder.children) && folder.children.length > 0;
+
+    let label;
+    if (treeType === "B") {
+        label = hasDirectFolders ? "👥 Tổ chuyên môn" : "👥 Tổ (rỗng)";
+    } else {
+        label = hasDirectFolders ? "👤 Giáo viên" : "👤 Giáo viên (có file trực tiếp)";
+    }
+
+    const countText = hasDirectFolders
+        ? folder.children.length + (treeType === "B" ? " giáo viên" : " mục")
+        : "Chưa tải";
+
+    return `
+        <div class="tree-item top-item" data-folder-id="${escapeAttribute(folder.id)}">
+            <div class="tree-row root-row" data-name="${escapeAttribute(folder.name)}" data-type="folder">
+                <div class="toggle" onclick="handleTopLevel(event, '${escapeJs(folder.id)}', '${escapeJs(childrenId)}', this)">▶</div>
+                <div class="item-icon">${treeType === "B" ? "👥" : "📁"}</div>
+                <div class="name-column">
+                    <div class="item-name folder-name">
+                        <a href="${escapeAttribute(folder.url || "#")}" target="_blank" onclick="loadFullFolder(event, '${escapeJs(folder.id)}', '${escapeJs(childrenId)}', this.closest('.tree-row').querySelector('.toggle'))">${escapeHtml(folder.name)}</a>
+                    </div>
+                </div>
+                <div class="file-count-column"><span class="file-count zero">${countText}</span></div>
+                <div class="date-column">${formatDateShort(folder.updated)}</div>
+                <div class="type-column">${label}</div>
+                <div class="open-column">
+                    <a class="open-drive" href="${escapeAttribute(folder.url || "#")}" target="_blank" onclick="event.stopPropagation()">Mở ↗</a>
+                </div>
+            </div>
+            <div id="${childrenId}" class="children"></div>
+        </div>
+    `;
+}
+
+async function handleTopLevel(event, folderId, childrenId, button) {
+    event.stopPropagation();
+    const item = (driveData.children || []).find(x => x.id === folderId);
+    if (!item) return;
+
+    const container = document.getElementById(childrenId);
+    if (!container) return;
+
+    const treeType = (driveData && driveData.treeType) || "A";
+    const hasDirectFolders = Array.isArray(item.children) && item.children.length > 0;
+
+    if (hasDirectFolders) {
+        const isOpen = container.classList.contains("open");
+        if (isOpen) {
+            container.classList.remove("open");
+            button.innerHTML = "▶";
+            return;
+        }
+
+        if (treeType === "B") {
+            container.innerHTML = (item.children || []).map(gv => createTeacherCandidateRow(gv, 1)).join("");
+        } else {
+            container.innerHTML = (item.children || []).map(sub => createFolderCandidateRow(sub, 1)).join("");
+        }
+
+        container.classList.add("open");
+        button.innerHTML = "▼";
+
+        const label = treeType === "B" ? "giáo viên" : "môn học";
+        setConnectionStatus(`🟢 Đã hiện danh sách ${label} trong "${escapeHtml(item.name)}". Chọn để tải toàn bộ cây.`, "success");
+        return;
+    }
+
+    await loadFullFolder(event, folderId, childrenId, button);
+}
+
+function createTeacherCandidateRow(folder, level) {
+    const childrenId = "teacher_children_" + createSafeId(folder.id) + "_" + Math.random().toString(36).slice(2);
+    const indent = level * 20;
+
+    return `
+        <div class="tree-item teacher-item">
+            <div class="tree-row" data-name="${escapeAttribute(folder.name)}" data-type="folder" style="padding-left:${indent}px;">
+                <div class="toggle" onclick="loadFullFolder(event, '${escapeJs(folder.id)}', '${escapeJs(childrenId)}', this)">▶</div>
+                <div class="item-icon">👤</div>
+                <div class="name-column">
+                    <div class="item-name folder-name">
+                        <a href="${escapeAttribute(folder.url || "#")}" target="_blank" onclick="loadFullFolder(event, '${escapeJs(folder.id)}', '${escapeJs(childrenId)}', this.closest('.tree-row').querySelector('.toggle'))">${escapeHtml(folder.name)}</a>
+                    </div>
+                </div>
+                <div class="file-count-column"><span class="file-count zero">Chưa tải</span></div>
+                <div class="date-column">${formatDateShort(folder.updated)}</div>
+                <div class="type-column">Giáo viên</div>
+                <div class="open-column">
+                    <a class="open-drive" href="${escapeAttribute(folder.url || "#")}" target="_blank" onclick="event.stopPropagation()">Mở ↗</a>
+                </div>
+            </div>
+            <div id="${childrenId}" class="children"></div>
+        </div>
+    `;
+}
+
+function createFolderCandidateRow(folder, level) {
+    const childrenId = "subject_children_" + createSafeId(folder.id) + "_" + Math.random().toString(36).slice(2);
+    const indent = level * 20;
+
+    return `
+        <div class="tree-item">
+            <div class="tree-row" data-name="${escapeAttribute(folder.name)}" data-type="folder" style="padding-left:${indent}px;">
+                <div class="toggle" onclick="loadFullFolder(event, '${escapeJs(folder.id)}', '${escapeJs(childrenId)}', this)">▶</div>
+                <div class="item-icon">📚</div>
+                <div class="name-column">
+                    <div class="item-name folder-name">
+                        <a href="${escapeAttribute(folder.url || "#")}" target="_blank" onclick="loadFullFolder(event, '${escapeJs(folder.id)}', '${escapeJs(childrenId)}', this.closest('.tree-row').querySelector('.toggle'))">${escapeHtml(folder.name)}</a>
+                    </div>
+                </div>
+                <div class="file-count-column"><span class="file-count zero">Chưa tải</span></div>
+                <div class="date-column">${formatDateShort(folder.updated)}</div>
+                <div class="type-column">Môn học</div>
+                <div class="open-column">
+                    <a class="open-drive" href="${escapeAttribute(folder.url || "#")}" target="_blank" onclick="event.stopPropagation()">Mở ↗</a>
+                </div>
+            </div>
+            <div id="${childrenId}" class="children"></div>
+        </div>
+    `;
+}
+
+async function loadFullFolder(event, folderId, childrenId, button) {
+    if (event) event.stopPropagation();
+    const container = document.getElementById(childrenId);
+    if (!container) return;
+    if (loadedFolders.has(folderId)) {
+        const isOpen = container.classList.contains("open");
+        container.classList.toggle("open", !isOpen);
+        button.innerHTML = isOpen ? "▶" : "▼";
+        return;
+    }
+    if (loadingFolders.has(folderId)) return;
+    loadingFolders.add(folderId);
+    button.innerHTML = "⏳";
+    container.innerHTML = '<div class="loading">⏳ Đang tải toàn bộ cây thư mục...</div>';
+    container.classList.add("open");
+    setConnectionStatus("⏳ Đang tải toàn bộ thư mục...", "info");
+    try {
+        const data = await api(folderId, "full");
+        loadedFolders.set(folderId, data);
+        container.innerHTML = (data.children || []).map(item => item.type === "folder" ? createFolderHTML(item, 1) : createFileHTML(item, 1)).join("");
+        container.classList.add("open");
+        openAllInside(container);
+        button.innerHTML = "▼";
+        setConnectionStatus("🟢 Đã tải toàn bộ cây thư mục của " + escapeHtml(data.name || "thư mục") + ".", "success");
+    } catch (error) {
+        container.classList.add("open");
+        container.innerHTML = `<div class="retry-box">❌ Không tải được thư mục.<br><small>${escapeHtml(error.message || "Lỗi kết nối Google Drive.")}</small><br><button class="gray" onclick="retryLoadFolder(event, '${escapeJs(folderId)}', '${escapeJs(childrenId)}', this)">🔄 Thử lại</button></div>`;
+        button.innerHTML = "▶";
+        setConnectionStatus("🔴 Không thể tải thư mục sau " + MAX_RETRIES + " lần thử.", "error");
+    } finally { loadingFolders.delete(folderId); }
+}
+
+async function retryLoadFolder(event, folderId, childrenId, retryButton) {
+    if (event) event.stopPropagation();
+    loadedFolders.delete(folderId);
+    const container = document.getElementById(childrenId);
+    const button = container && container.previousElementSibling ? container.previousElementSibling.querySelector(".toggle") : retryButton;
+    await loadFullFolder(event, folderId, childrenId, button);
+}
+
+function createFolderHTML(folder, level) {
+    const indent = level * 20;
+    const childrenId = "children_" + createSafeId(folder.id) + "_" + Math.random().toString(36).slice(2);
+    const hasChildren = folder.children && folder.children.length > 0;
+
+    let html = `<div class="tree-item">`;
+    html += `<div class="tree-row" data-name="${escapeAttribute(folder.name)}" data-type="folder" style="padding-left:${indent}px;">`;
+    html += hasChildren
+        ? `<div class="toggle" onclick="toggleFolder('${escapeJs(childrenId)}', this)">▶</div>`
+        : `<div class="toggle empty"></div>`;
+    html += `<div class="item-icon">📁</div>`;
+    html += `<div class="name-column"><div class="item-name folder-name"><a href="${escapeAttribute(folder.url || "#")}" target="_blank">${escapeHtml(folder.name)}</a></div></div>`;
+    html += `<div class="file-count-column">${createFileCountHTML(folder.fileCount)}</div>`;
+    html += `<div class="date-column">${formatDateShort(folder.updated)}</div>`;
+    html += `<div class="type-column">Thư mục</div>`;
+    html += `<div class="open-column"><a class="open-drive" href="${escapeAttribute(folder.url || "#")}" target="_blank">Mở ↗</a></div>`;
+    html += `</div>`;
+    if (hasChildren) {
+        html += `<div id="${childrenId}" class="children">`;
+        html += folder.children.map(item => item.type === "folder" ? createFolderHTML(item, level + 1) : createFileHTML(item, level + 1)).join("");
+        html += `</div>`;
+    }
+    html += `</div>`;
+    return html;
+}
+
+function createFileHTML(file, level) {
+    const indent = level * 20;
+    const dateText = formatDateShort(file.updated || file.created);
+    const fileName = String(file.name || "").trim();
+    const isSkipFile = fileName.toLowerCase() === "[skip]";
+
+    if (isSkipFile) {
+        return `
+            <div class="tree-item">
+                <div class="tree-row skip-file-row" data-name="${escapeAttribute(file.name)}" data-type="file" style="padding-left:${indent}px;">
+                    <div class="toggle empty"></div>
+                    <div class="item-icon">🚫</div>
+                    <div class="name-column">
+                        <div class="item-name file-name">
+                            <a href="${escapeAttribute(file.url || "#")}" target="_blank">[skip]</a>
+                            <span class="skip-note">— Bỏ qua không kiểm tra</span>
+                        </div>
+                    </div>
+                    <div class="file-count-column"></div>
+                    <div class="date-column">${dateText}</div>
+                    <div class="type-column">Đánh dấu</div>
+                    <div class="open-column">
+                        <a class="open-drive" href="${escapeAttribute(file.url || "#")}" target="_blank">Mở ↗</a>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    return `<div class="tree-item"><div class="tree-row" data-name="${escapeAttribute(file.name)}" data-type="file" style="padding-left:${indent}px;"><div class="toggle empty"></div><div class="item-icon">${getFileIcon(file.mimeType)}</div><div class="name-column"><div class="item-name file-name"><a href="${escapeAttribute(file.url || "#")}" target="_blank">${escapeHtml(file.name)}</a></div></div><div class="file-count-column"></div><div class="date-column">${dateText}</div><div class="type-column">${getFileType(file.mimeType)}</div><div class="open-column"><a class="open-drive" href="${escapeAttribute(file.url || "#")}" target="_blank">Mở ↗</a></div></div></div>`;
+}
+
+function formatDateShort(ts) {
+    if (ts === null || ts === undefined || ts === "") return "";
+    try {
+        const d = new Date(Number(ts));
+        if (isNaN(d.getTime())) return "";
+        const pad = n => String(n).padStart(2, '0');
+        return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    } catch (e) {
+        return "";
+    }
+}
+
+function createFileCountHTML(count) {
+    count = Number(count) || 0;
+    return count === 0 ? '<span class="file-count zero">0 file</span>' : `<span class="file-count">${count} file</span>`;
+}
+
+function getFileIcon(mimeType) {
+    if (!mimeType) return "📄";
+    if (mimeType.includes("pdf")) return "📕";
+    if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) return "📊";
+    if (mimeType.includes("document") || mimeType.includes("word")) return "📝";
+    if (mimeType.includes("presentation")) return "📽️";
+    if (mimeType.includes("image")) return "🖼️";
+    if (mimeType.includes("video")) return "🎬";
+    if (mimeType.includes("audio")) return "🎵";
+    return "📄";
+}
+
+function getFileType(mimeType) {
+    if (!mimeType) return "Tập tin";
+    if (mimeType.includes("pdf")) return "PDF";
+    if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) return "Excel";
+    if (mimeType.includes("document") || mimeType.includes("word")) return "Word";
+    if (mimeType.includes("presentation")) return "PowerPoint";
+    if (mimeType.includes("image")) return "Hình ảnh";
+    return "Tập tin";
+}
+
+function toggleFolder(childrenId, button) {
+    const element = document.getElementById(childrenId);
+    if (!element) return;
+    const isOpen = element.classList.contains("open");
+    element.classList.toggle("open", !isOpen);
+    button.innerHTML = isOpen ? "▶" : "▼";
+}
+
+function openAllInside(container) {
+    if (!container) return;
+    container.querySelectorAll(".children").forEach(el => el.classList.add("open"));
+    container.querySelectorAll(".toggle:not(.empty)").forEach(el => {
+        if (el.innerHTML !== "⏳") el.innerHTML = "▼";
+    });
+}
+
+/* ============================================================
+   MODAL CHỌN TUẦN
+============================================================ */
+function openWeekModal() {
+    const overlay = document.getElementById("weekModal");
+    const input = document.getElementById("weekModalInput");
+    const error = document.getElementById("weekModalError");
+
+    error.classList.remove("show");
+    error.textContent = "";
+
+    if (typeof weekInfo !== "undefined" && weekInfo && weekInfo.week !== "dự trữ") {
+        input.value = String(weekInfo.week).replace(/^0+/, "") || "";
+    } else if (selectedWeekNumber) {
+        input.value = selectedWeekNumber;
+    } else {
+        input.value = "";
+    }
+
+    renderQuickWeekButtons();
+    restoreScanModeUI();
+
+    overlay.classList.add("show");
+    setTimeout(() => input.focus(), 80);
+}
+
+function closeWeekModal() {
+    document.getElementById("weekModal").classList.remove("show");
+}
+
+function renderQuickWeekButtons() {
+    const container = document.getElementById("weekQuickButtons");
+    if (!container) return;
+
+    let current = null;
+    if (typeof weekInfo !== "undefined" && weekInfo && weekInfo.week !== "dự trữ") {
+        const n = parseInt(String(weekInfo.week).replace(/^0+/, ""), 10);
+        if (!isNaN(n)) current = n;
+    }
+
+    const quick = [];
+    if (current !== null) {
+        for (let offset = -2; offset <= 2; offset++) {
+            const w = current + offset;
+            if (w >= 1 && w <= 40) quick.push(w);
+        }
+    } else {
+        quick.push(1, 2, 3, 4, 5);
+    }
+
+    container.innerHTML = quick.map(w => {
+        const isCurrent = (current !== null && w === current);
+        return `<button type="button" class="${isCurrent ? 'current' : ''}" onclick="setWeekFromQuick(${w})">Tuần ${w}</button>`;
+    }).join("");
+}
+
+function setWeekFromQuick(w) {
+    const input = document.getElementById("weekModalInput");
+    if (input) {
+        input.value = w;
+        input.focus();
+    }
+    const error = document.getElementById("weekModalError");
+    error.classList.remove("show");
+    error.textContent = "";
+    updateRangePreview();
+}
+
+function restoreScanModeUI() {
+    const radios = document.querySelectorAll('input[name="scanMode"]');
+    radios.forEach(r => { r.checked = (r.value === selectedScanMode); });
+
+    const beforeInput = document.getElementById("weekBeforeInput");
+    const afterInput = document.getElementById("weekAfterInput");
+    if (beforeInput) beforeInput.value = selectedWeekBefore;
+    if (afterInput) afterInput.value = selectedWeekAfter;
+
+    toggleRangeOptionsVisibility();
+    updateRangePreview();
+}
+
+function toggleRangeOptionsVisibility() {
+    const rangeBox = document.getElementById("rangeOptions");
+    if (!rangeBox) return;
+    const isRange = selectedScanMode === "range";
+    rangeBox.classList.toggle("hidden", !isRange);
+}
+
+function updateRangePreview() {
+    const preview = document.getElementById("rangePreview");
+    if (!preview) return;
+
+    if (selectedScanMode !== "range") return;
+
+    const beforeInput = document.getElementById("weekBeforeInput");
+    const afterInput = document.getElementById("weekAfterInput");
+    const weekInput = document.getElementById("weekModalInput");
+
+    const target = parseInt(weekInput && weekInput.value, 10);
+    const before = Math.max(0, parseInt(beforeInput && beforeInput.value, 10) || 0);
+    const after = Math.max(0, parseInt(afterInput && afterInput.value, 10) || 0);
+
+    preview.classList.remove("nearby-warning");
+
+    if (isNaN(target)) {
+        preview.textContent = "Nhập số tuần để xem khoảng quét.";
+        return;
+    }
+
+    const from = Math.max(1, target - before);
+    const to = target + after;
+    preview.textContent = `Sẽ quét: Tuần ${from} → ${to}`;
+
+    if (to > 40) {
+        preview.classList.add("nearby-warning");
+        preview.textContent += ` (vượt quá tuần 40)`;
+    }
+}
+
+function initScanModeUI() {
+    const radios = document.querySelectorAll('input[name="scanMode"]');
+    radios.forEach(r => {
+        r.addEventListener("change", function() {
+            selectedScanMode = this.value;
+            toggleRangeOptionsVisibility();
+            updateRangePreview();
+        });
+    });
+
+    const beforeInput = document.getElementById("weekBeforeInput");
+    const afterInput = document.getElementById("weekAfterInput");
+    const weekInput = document.getElementById("weekModalInput");
+
+    if (beforeInput) {
+        beforeInput.addEventListener("input", function() {
+            let v = parseInt(this.value, 10);
+            if (isNaN(v) || v < 0) v = 0;
+            if (v > 10) v = 10;
+            selectedWeekBefore = v;
+            updateRangePreview();
+        });
+    }
+
+    if (afterInput) {
+        afterInput.addEventListener("input", function() {
+            let v = parseInt(this.value, 10);
+            if (isNaN(v) || v < 0) v = 0;
+            if (v > 10) v = 10;
+            selectedWeekAfter = v;
+            updateRangePreview();
+        });
+    }
+
+    if (weekInput) {
+        weekInput.addEventListener("input", updateRangePreview);
+    }
+
+    restoreScanModeUI();
+}
+
+function confirmWeekSelection() {
+    const input = document.getElementById("weekModalInput");
+    const error = document.getElementById("weekModalError");
+    const raw = input ? String(input.value).trim() : "";
+
+    if (raw === "") {
+        error.textContent = "Vui lòng nhập số tuần cần tìm.";
+        error.classList.add("show");
+        input.focus();
+        return;
+    }
+
+    const parsed = parseInt(raw, 10);
+    if (isNaN(parsed) || parsed < 1 || parsed > 40) {
+        error.textContent = "Số tuần không hợp lệ. Vui lòng nhập từ 1 đến 40.";
+        error.classList.add("show");
+        input.focus();
+        return;
+    }
+
+    const checked = document.querySelector('input[name="scanMode"]:checked');
+    selectedScanMode = checked ? checked.value : "range";
+
+    const beforeInput = document.getElementById("weekBeforeInput");
+    const afterInput = document.getElementById("weekAfterInput");
+    selectedWeekBefore = Math.max(0, parseInt(beforeInput && beforeInput.value, 10) || 0);
+    selectedWeekAfter  = Math.max(0, parseInt(afterInput  && afterInput.value,  10) || 0);
+
+    selectedWeekNumber = String(parsed);
+    error.classList.remove("show");
+    error.textContent = "";
+    closeWeekModal();
+
+    openAll(selectedWeekNumber);
+}
+
+/* ============================================================
+   TÌM FILE THEO TUẦN
+============================================================ */
+function createWeekResultsContainer() {
+    const old = document.getElementById("weekResults");
+    if (old) old.remove();
+
+    const box = document.createElement("div");
+    box.id = "weekResults";
+    box.className = "week-results";
+    document.getElementById("tree").insertAdjacentElement("afterend", box);
+    return box;
+}
+
+/* ⭐ V28: CHỈ ĐÁNH GIÁ THIẾU FILE Ở CẤP MÔN (depth = 0) */
+function renderWeekResultsGrouped(orderedGroups, totalTeachers, weekLabelOverride, failedFolderIds) {
+    const box = document.getElementById("weekResults");
+    if (!box) return;
+
+    weekApprovalGroups = new Map();
+    currentApprovalWeek = weekLabelOverride || null;
+    orderedGroups.forEach(group => weekApprovalGroups.set(group.id, group));
+
+    let weekLabel;
+    if (weekLabelOverride) {
+        weekLabel = weekLabelOverride;
+    } else if (weekInfo && weekInfo.week !== "dự trữ") {
+        weekLabel = "TUẦN " + String(weekInfo.week).replace(/^0+/, "");
+    } else {
+        weekLabel = "TUẦN DỰ TRỮ";
+    }
+
+    let totalFiles = 0;
+    let teachersWithFile = 0;
+    let teachersEmpty = 0;
+    orderedGroups.forEach(g => {
+        if (g.skipped) return;
+        let count = (g.directFiles || []).length;
+        (g.folders || []).forEach(f => {
+            if (f.skipped) return;
+            count += (f.files || []).length;
+        });
+        totalFiles += count;
+        if (count > 0) teachersWithFile++;
+        else teachersEmpty++;
+    });
+
+    if (orderedGroups.length === 0) {
+        box.innerHTML = `
+            <div class="week-results-header">
+                📂 File của ${escapeHtml(weekLabel)}
+                <div class="week-results-meta">Không có thư mục giáo viên nào để quét.</div>
+            </div>
+            <div class="empty-result">Không có dữ liệu.</div>
+        `;
+        return;
+    }
+
+    let scanBadgeHtml = "";
+    if (selectedScanMode === "range") {
+        const targetNum = parseInt(String(weekLabel).replace(/\D/g, ""), 10) || 0;
+        const from = Math.max(1, targetNum - selectedWeekBefore);
+        const to = targetNum + selectedWeekAfter;
+        scanBadgeHtml = `<span class="scan-badge range">⚡ Quét khoảng: Tuần ${from} → ${to}</span>`;
+    } else {
+        scanBadgeHtml = `<span class="scan-badge deep">🌳 Quét toàn bộ cây</span>`;
+    }
+
+    let rowsHtml = "";
+    let groupIndex = 0;
+
+    orderedGroups.forEach(group => {
+        groupIndex++;
+
+        const isFailed = failedFolderIds && failedFolderIds.has(group.id);
+        const isSkipped = group.skipped === true;
+
+        let totalFileCount = (group.directFiles || []).length;
+        (group.folders || []).forEach(f => {
+            totalFileCount += (f.files || []).length;
+        });
+        const isEmptyTeacher = totalFileCount === 0;
+
+        let rowClass = "group-row";
+        if (isFailed) {
+            rowClass += " group-error";
+        } else if (isSkipped) {
+            rowClass += " group-skipped";
+        }
+
+        let badge;
+        if (isFailed) {
+            badge = `<span class="group-count failed">Lỗi tải</span>`;
+        } else if (isSkipped) {
+            badge = `<span class="group-count skipped-badge">Bỏ qua</span>`;
+        } else if (isEmptyTeacher) {
+            badge = `<span class="group-count">0 file</span>`;
+        } else {
+            badge = `<span class="group-count">${totalFileCount} file</span>`;
+        }
+
+        const approveDisabled = (isSkipped || isEmptyTeacher) ? "disabled" : "";
+
+        const toBadge = group.toName
+            ? ` <span style="color:#5f6368; font-size:12px; font-weight:500;">(${escapeHtml(group.toName)})</span>`
+            : "";
+
+        rowsHtml += `
+            <tr class="${rowClass} ctx-target"
+                data-ctx-id="${escapeAttribute(group.id)}"
+                data-ctx-name="${escapeAttribute(group.name)}"
+                data-ctx-url="${escapeAttribute(group.url)}"
+                data-ctx-type="teacher"
+                oncontextmenu="showContextMenu(event, this)">
+                <td class="group-index-cell">${groupIndex}</td>
+                <td class="group-cell" colspan="3">
+                    📁 <b>${escapeHtml(group.name)}</b>${toBadge}
+                    ${badge}
+                    <button class="approve-btn" type="button"
+                        onclick="approveTeacherWeek('${escapeJs(group.id)}', this)"
+                        ${approveDisabled}>✓ Duyệt</button>
+                    <a class="group-open" href="${escapeAttribute(group.url)}" target="_blank" onclick="event.stopPropagation()">Mở thư mục ↗</a>
+                </td>
+            </tr>
+        `;
+
+        if (isFailed) {
+            rowsHtml += `
+                <tr class="empty-note-row empty-note-error">
+                    <td></td>
+                    <td colspan="3" style="padding:10px 14px; font-style:italic; font-size:13px;">
+                        ❌ Không tải được dữ liệu thư mục này.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        if (isSkipped) return;
+
+        // ⭐ V28: Render từng thư mục (môn + thư mục con của môn)
+        (group.folders || []).forEach(folder => {
+            const depth = folder.depth || 0;
+            const isSubject = (depth === 0);   // ⭐ CHỈ MÔN MỚI ĐÁNH GIÁ
+            const folderSkipped = folder.skipped === true;
+
+            // ⭐ V28: Chỉ môn mới đánh giá thiếu file
+            const folderEmpty = isSubject && !folderSkipped && (folder.fileCount || 0) === 0;
+            const folderHasFiles = isSubject && !folderSkipped && (folder.fileCount || 0) > 0;
+            const isSubFolder = !isSubject;
+
+            let folderRowClass = "folder-row depth-" + depth;
+            if (folderSkipped) folderRowClass += " folder-skipped";
+            else if (folderEmpty) folderRowClass += " folder-empty-red";
+            else if (folderHasFiles) folderRowClass += " folder-has-files";
+            if (isSubFolder && !folderSkipped) folderRowClass += " folder-sub-of-subject";
+
+            let icon = "📁";
+            if (depth === 0) icon = "📚";
+
+            let noteHtml = "";
+            if (folderSkipped) {
+                noteHtml = `<span class="folder-note">🚫 Bỏ qua tìm kiếm</span>`;
+            } else if (isSubject) {
+                // ⭐ MÔN: đánh giá thiếu / có file
+                if (folderEmpty) {
+                    noteHtml = `<span class="folder-note">⚠️ Chưa có file ${escapeHtml(weekLabel)}</span>`;
+                } else {
+                    noteHtml = `<span class="folder-file-count">${folder.fileCount} file (cả cây con)</span>`;
+                }
+            } else {
+                // ⭐ THƯ MỤC CON CỦA MÔN: chỉ hiển thị số file, KHÔNG đánh giá
+                const n = (folder.files || []).length;
+                if (n > 0) {
+                    noteHtml = `<span class="folder-file-count" style="color:#5f6368;">${n} file</span>`;
+                } else {
+                    noteHtml = `<span class="folder-note" style="color:#80868b; font-style:italic;">—</span>`;
+                }
+            }
+
+            rowsHtml += `
+                <tr class="${folderRowClass} ctx-target"
+                    data-ctx-id="${escapeAttribute(folder.id)}"
+                    data-ctx-name="${escapeAttribute(folder.name)}"
+                    data-ctx-url="${escapeAttribute(folder.url)}"
+                    data-ctx-type="subject"
+                    oncontextmenu="showContextMenu(event, this)">
+                    <td class="folder-index-cell"></td>
+                    <td class="folder-row-cell" colspan="3">
+                        <span class="folder-icon">${icon}</span>
+                        <b>${escapeHtml(folder.name)}</b>
+                        ${noteHtml}
+                        <a class="open-folder-btn" href="${escapeAttribute(folder.url)}" target="_blank" onclick="event.stopPropagation()">📂 Mở</a>
+                    </td>
+                </tr>
+            `;
+
+            // Vẫn liệt kê file trong thư mục con (nếu có)
+            if (!folderSkipped && (folder.files || []).length > 0) {
+                (folder.files || []).forEach(item => {
+                    const dateText = formatDateShort(item.updated || item.created);
+
+                    rowsHtml += `
+                        <tr class="file-row file-under-folder">
+                            <td class="group-index-empty"></td>
+                           <td class="file-col" style="padding-left: 12px;">
+                                <span class="result-icon">${getFileIcon(item.mimeType)}</span>
+                                <a data-file-id="${escapeAttribute(item.id || "")}" href="${escapeAttribute(item.url || "#")}" target="_blank">
+                                    ${escapeHtml(item.name)}
+                                </a>
+                            </td>
+                            <td class="date-col">${dateText}</td>
+                            <td class="action-col">
+                                <a class="open-drive" href="${escapeAttribute(item.url || "#")}" target="_blank">Mở ↗</a>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        });
+
+        if (group.directFiles.length > 0) {
+            rowsHtml += `
+                <tr class="folder-row depth-0 ctx-target"
+                    data-ctx-id="${escapeAttribute(group.id)}"
+                    data-ctx-name="${escapeAttribute(group.name)}"
+                    data-ctx-url="${escapeAttribute(group.url)}"
+                    data-ctx-type="teacher"
+                    oncontextmenu="showContextMenu(event, this)">
+                    <td class="folder-index-cell"></td>
+                    <td class="folder-row-cell" colspan="3" style="background:#eef4ff;color:#174ea6;">
+                        <span class="folder-icon">📄</span>
+                        <b>(File trực tiếp trong thư mục giáo viên)</b>
+                        <span class="folder-file-count" style="color:#1967d2;">${group.directFiles.length} file</span>
+                    </td>
+                </tr>
+            `;
+
+            group.directFiles.forEach(item => {
+                const dateText = formatDateShort(item.updated || item.created);
+
+                rowsHtml += `
+                    <tr class="file-row file-under-folder">
+                        <td class="group-index-empty"></td>
+                       <td class="file-col" style="padding-left: 12px;">
+                            <span class="result-icon">${getFileIcon(item.mimeType)}</span>
+                            <a data-file-id="${escapeAttribute(item.id || "")}" href="${escapeAttribute(item.url || "#")}" target="_blank">
+                                ${escapeHtml(item.name)}
+                            </a>
+                        </td>
+                        <td class="date-col">${dateText}</td>
+                        <td class="action-col">
+                            <a class="open-drive" href="${escapeAttribute(item.url || "#")}" target="_blank">Mở ↗</a>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+    });
+
+    box.innerHTML = `
+        <div class="week-results-header">
+            📂 File của ${escapeHtml(weekLabel)}
+            <button class="approve-all-btn" type="button" onclick="approveAllWeeks(this)" ${totalFiles === 0 ? "disabled" : ""}>✓ Duyệt tất cả</button>
+            <div class="week-results-meta">
+                ${scanBadgeHtml}<br>
+                Tìm thấy <b>${totalFiles}</b> file trong <b>${totalTeachers}</b> thư mục giáo viên —
+                <b style="color:#137333;">${teachersWithFile}</b> giáo viên có file,
+                <b style="color:#c5221f;">${teachersEmpty}</b> giáo viên chưa có file.
+                <br><small>💡 <b>Lưu ý:</b> Chỉ <b>thư mục môn</b> (cấp 1 trong thư mục GV) được đánh giá thiếu file. Thư mục con của môn chỉ liệt kê file.</small>
+            </div>
+
+            <div id="approveProgress" class="approve-progress">
+                <div class="approve-progress-info">
+                    <span id="approveProgressLabel">⏳ Đang chuẩn bị...</span>
+                    <span id="approveProgressPercent">0%</span>
+                </div>
+                <div class="approve-progress-bar">
+                    <div id="approveProgressFill" class="approve-progress-fill"></div>
+                </div>
+                <div id="approveProgressStats" class="approve-progress-stats"></div>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:55px; text-align:center;">STT</th>
+                    <th>Giáo viên / Thư mục / File</th>
+                    <th style="width:110px; text-align:center;">Ngày úp</th>
+                    <th style="width:90px; text-align:center;">Mở</th>
+                </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+        </table>
+    `;
+}
+
+/* ============================================================
+   CONTEXT MENU
+============================================================ */
+function showContextMenu(event, rowEl) {
+    if (event && typeof event.preventDefault === "function") {
+        event.preventDefault();
+    }
+    if (event && typeof event.stopPropagation === "function") {
+        event.stopPropagation();
+    }
+
+    const id = rowEl.getAttribute("data-ctx-id");
+    const name = rowEl.getAttribute("data-ctx-name");
+    const url = rowEl.getAttribute("data-ctx-url");
+    const type = rowEl.getAttribute("data-ctx-type");
+
+    if (!id) return;
+
+    ctxTarget = { id, name, url, type };
+
+    const menu = document.getElementById("contextMenu");
+    const header = document.getElementById("ctxHeader");
+    header.textContent = (type === "teacher" ? "👤 " : "📚 ") + name;
+
+    document.getElementById("ctxSkip").classList.remove("disabled");
+    document.getElementById("ctxUnskip").classList.remove("disabled");
+
+    menu.classList.add("show");
+
+    let x = (event && event.clientX) || 0;
+    let y = (event && event.clientY) || 0;
+    const menuW = menu.offsetWidth || 260;
+    const menuH = menu.offsetHeight || 160;
+
+    if (x + menuW > window.innerWidth) x = Math.max(8, window.innerWidth - menuW - 8);
+    if (y + menuH > window.innerHeight) y = Math.max(8, window.innerHeight - menuH - 8);
+
+    menu.style.left = x + "px";
+    menu.style.top = y + "px";
+}
+
+function hideContextMenu() {
+    const menu = document.getElementById("contextMenu");
+    if (menu) menu.classList.remove("show");
+    ctxTarget = null;
+}
+
+async function ctxActionSkip() {
+    if (!ctxTarget) return;
+    const target = ctxTarget;
+    hideContextMenu();
+
+    if (!confirm(`BỎ QUA tìm kiếm thư mục:\n"${target.name}"\n\n→ Sẽ tạo tập tin [skip] trong thư mục này và khóa lại.\nCác lần tìm kiếm sau sẽ bỏ qua thư mục này.`)) return;
+
+    setConnectionStatus(`⏳ Đang tạo [skip] trong "${escapeHtml(target.name)}"...`, "info");
+    try {
+        const data = await apiPost({
+            folderId: FOLDER_ID,
+            mode: "createSkip",
+            targetFolderId: target.id
+        }, 60000);
+
+        if (data && data.alreadyExists) {
+            setConnectionStatus(`ℹ️ Thư mục "${escapeHtml(target.name)}" đã có [skip] từ trước.`, "warning");
+            alert(`Thư mục "${target.name}" đã có [skip] từ trước.`);
+        } else {
+            setConnectionStatus(`🟢 Đã tạo [skip] và khóa trong "${escapeHtml(target.name)}".`, "success");
+            alert(`✅ Đã bỏ qua thư mục "${target.name}".\nTập tin [skip] đã được tạo và khóa.`);
+        }
+    } catch (error) {
+        setConnectionStatus(`🔴 Lỗi tạo [skip]: ${escapeHtml(error.message)}`, "error");
+        alert("❌ Không thể tạo [skip]: " + (error.message || error));
+    }
+}
+
+async function ctxActionUnskip() {
+    if (!ctxTarget) return;
+    const target = ctxTarget;
+    hideContextMenu();
+
+    if (!confirm(`CHO PHÉP tìm kiếm thư mục:\n"${target.name}"\n\n→ Sẽ xóa tập tin [skip] trong thư mục này.\nCác lần tìm kiếm sau sẽ quét thư mục này bình thường.`)) return;
+
+    setConnectionStatus(`⏳ Đang xóa [skip] trong "${escapeHtml(target.name)}"...`, "info");
+    try {
+        const data = await apiPost({
+            folderId: FOLDER_ID,
+            mode: "deleteSkip",
+            targetFolderId: target.id
+        }, 60000);
+
+        if (data && data.notFound) {
+            setConnectionStatus(`ℹ️ Thư mục "${escapeHtml(target.name)}" không có [skip].`, "warning");
+            alert(`Thư mục "${target.name}" không có [skip] để xóa.`);
+        } else {
+            setConnectionStatus(`🟢 Đã xóa [skip] trong "${escapeHtml(target.name)}".`, "success");
+            alert(`✅ Đã cho phép tìm kiếm thư mục "${target.name}".\nTập tin [skip] đã được xóa.`);
+        }
+    } catch (error) {
+        setConnectionStatus(`🔴 Lỗi xóa [skip]: ${escapeHtml(error.message)}`, "error");
+        alert("❌ Không thể xóa [skip]: " + (error.message || error));
+    }
+}
+
+function ctxActionOpen() {
+    if (!ctxTarget) return;
+    const url = ctxTarget.url;
+    hideContextMenu();
+    if (url && url !== "#") window.open(url, "_blank");
+}
+
+document.addEventListener("click", function(e) {
+    const menu = document.getElementById("contextMenu");
+    if (menu && menu.classList.contains("show") && !menu.contains(e.target)) {
+        hideContextMenu();
+    }
+});
+document.addEventListener("scroll", hideContextMenu, true);
+window.addEventListener("resize", hideContextMenu);
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") hideContextMenu();
+});
+
+/* ============================================================
+   DUYỆT FILE
+============================================================ */
+function getGroupFileIds(group) {
+    const ids = [];
+    if (group.skipped) return ids;
+    (group.directFiles || []).forEach(file => {
+        if (file && file.id) ids.push(file.id);
+    });
+    (group.folders || []).forEach(folder => {
+        if (folder.skipped) return;
+        (folder.files || []).forEach(file => {
+            if (file && file.id) ids.push(file.id);
+        });
+    });
+    return [...new Set(ids)];
+}
+
+function getAllWeekFileIds() {
+    const ids = [];
+    weekApprovalGroups.forEach(group => {
+        getGroupFileIds(group).forEach(id => ids.push(id));
+    });
+    return [...new Set(ids)];
+}
+
+function markFilesApproved(fileIds) {
+    const idSet = new Set(fileIds || []);
+    document.querySelectorAll("[data-file-id]").forEach(link => {
+        if (!idSet.has(link.getAttribute("data-file-id"))) return;
+        if (!link.querySelector(".approved-badge")) {
+            link.classList.add("approved-name");
+            link.insertAdjacentHTML("afterend", '<span class="approved-badge">ĐÃ DUYỆT</span>');
+        }
+        if (!String(link.textContent || "").startsWith("[ĐÃ DUYỆT]")) {
+            link.textContent = "[ĐÃ DUYỆT] " + link.textContent;
+        }
+    });
+}
+
+function extractWeekNumber(weekLabel) {
+    if (!weekLabel) return "";
+    const m = String(weekLabel).match(/\d+/);
+    return m ? m[0] : "";
+}
+
+async function approveFileIds(fileIds, teacherFolderIds, week, onProgress) {
+    const uniqueIds = [...new Set((fileIds || []).filter(Boolean))];
+    if (!uniqueIds.length) {
+        return {
+            approved: 0,
+            skipped: 0,
+            errors: [],
+            stats: { locked: 0, alreadyLocked: 0, lockFailed: 0, renameFailed: 0 }
+        };
+    }
+
+    const batchSize = 10;
+    const APPROVE_TIMEOUT_MS = 90000;
+
+    let approved = 0;
+    let skipped = 0;
+    const errors = [];
+    const stats = { locked: 0, alreadyLocked: 0, lockFailed: 0, renameFailed: 0 };
+
+    const totalBatches = Math.ceil(uniqueIds.length / batchSize);
+    const totalFiles = uniqueIds.length;
+
+    const emitProgress = function(batchIndex, filesProcessed) {
+        if (typeof onProgress === "function") {
+            try {
+                onProgress({
+                    batchIndex: batchIndex,
+                    totalBatches: totalBatches,
+                    filesProcessed: filesProcessed,
+                    totalFiles: totalFiles,
+                    approved: approved,
+                    skipped: skipped,
+                    locked: stats.locked,
+                    alreadyLocked: stats.alreadyLocked,
+                    lockFailed: stats.lockFailed,
+                    renameFailed: stats.renameFailed
+                });
+            } catch (e) {}
+        }
+    };
+
+    emitProgress(0, 0);
+
+    for (let start = 0; start < uniqueIds.length; start += batchSize) {
+        const batchIndex = Math.floor(start / batchSize) + 1;
+        const batch = uniqueIds.slice(start, start + batchSize);
+
+        emitProgress(batchIndex - 1, start);
+
+        const payload = {
+            folderId: FOLDER_ID,
+            mode: "approveFiles",
+            fileIds: batch.join(","),
+            week: week || "",
+            teacherFolderIds: teacherFolderIds
+                ? [...new Set(teacherFolderIds)].join(",")
+                : ""
+        };
+
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), APPROVE_TIMEOUT_MS);
+
+        try {
+            const response = await fetch(WEB_APP_URL, {
+                method: "POST",
+                cache: "no-store",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(payload),
+                signal: controller.signal
+            });
+            clearTimeout(timer);
+
+            if (!response.ok) throw new Error("HTTP " + response.status);
+
+            const result = await response.json();
+
+            if (!result || result.success !== true) {
+                throw new Error((result && result.error) || "Duyệt file thất bại.");
+            }
+
+            const data = result.data || {};
+
+            approved += Number(data.renamed) || 0;
+            skipped  += Number(data.skipped) || 0;
+
+            stats.renameFailed  += Number(data.renameFailed)  || 0;
+            stats.locked        += Number(data.locked)        || 0;
+            stats.alreadyLocked += Number(data.alreadyLocked) || 0;
+            stats.lockFailed    += Number(data.lockFailed)    || 0;
+
+            if (Array.isArray(data.errors)) errors.push(...data.errors);
+
+            emitProgress(batchIndex, Math.min(start + batch.length, totalFiles));
+
+        } catch (error) {
+            clearTimeout(timer);
+            if (error && error.name === "AbortError") {
+                throw new Error(
+                    `Timeout khi duyệt batch ${batchIndex}/${totalBatches} ` +
+                    `(quá ${Math.round(APPROVE_TIMEOUT_MS / 1000)}s).`
+                );
+            }
+            throw error;
+        }
+    }
+
+    markFilesApproved(uniqueIds);
+    return { approved, skipped, errors, stats };
+}
+
+function buildApprovalSummary(result, teacherName) {
+    const stats = result.stats || {};
+    let summary =
+        `✅ Đã duyệt ${result.approved} file mới` +
+        (result.skipped ? `, ${result.skipped} file đã duyệt trước đó` : "") +
+        (teacherName ? ` của ${teacherName}` : "") +
+        `.\n` +
+        `🔒 Đã khóa: ${stats.locked || 0} file` +
+        (stats.alreadyLocked ? ` (+${stats.alreadyLocked} file đã khóa sẵn)` : "");
+
+    if (stats.lockFailed) {
+        summary += `\n⚠️ Không khóa được: ${stats.lockFailed} file (đã bỏ qua).`;
+    }
+    if (stats.renameFailed) {
+        summary += `\n❌ Không đổi tên được: ${stats.renameFailed} file.`;
+    }
+    if (result.errors.length) {
+        const errorDetail = result.errors.slice(0, 5).join("\n");
+        summary += `\n\n📋 Chi tiết lỗi (${result.errors.length}):\n${errorDetail}` +
+                   (result.errors.length > 5 ? `\n... và ${result.errors.length - 5} lỗi khác` : "");
+    }
+    return summary;
+}
+
+function showApproveProgress() {
+    const el = document.getElementById("approveProgress");
+    if (!el) return;
+    el.className = "approve-progress show";
+    updateApproveProgress({
+        batchIndex: 0, totalBatches: 1,
+        filesProcessed: 0, totalFiles: 0,
+        approved: 0, skipped: 0,
+        locked: 0, alreadyLocked: 0, lockFailed: 0, renameFailed: 0
+    });
+}
+
+function updateApproveProgress(p) {
+    const box = document.getElementById("approveProgress");
+    if (!box) return;
+
+    const label = document.getElementById("approveProgressLabel");
+    const percent = document.getElementById("approveProgressPercent");
+    const fill = document.getElementById("approveProgressFill");
+    const stats = document.getElementById("approveProgressStats");
+
+    const totalFiles = p.totalFiles || 0;
+    const done = p.filesProcessed || 0;
+    const pct = totalFiles > 0 ? Math.round((done / totalFiles) * 100) : 0;
+
+    const batchInfo = p.totalBatches > 1
+        ? `Batch ${p.batchIndex}/${p.totalBatches} — `
+        : "";
+
+    if (label) {
+        label.textContent = done >= totalFiles && totalFiles > 0
+            ? "✅ Đã duyệt xong"
+            : `⏳ ${batchInfo}Đang duyệt ${done}/${totalFiles} file...`;
+    }
+    if (percent) percent.textContent = pct + "%";
+    if (fill) fill.style.width = pct + "%";
+
+    if (stats) {
+        const parts = [];
+        if (p.approved)        parts.push(`✅ ${p.approved} file mới`);
+        if (p.skipped)         parts.push(`⏭️ ${p.skipped} đã duyệt trước`);
+        if (p.locked)          parts.push(`🔒 ${p.locked} khóa mới`);
+        if (p.alreadyLocked)   parts.push(`🔐 ${p.alreadyLocked} đã khóa sẵn`);
+        if (p.lockFailed)      parts.push(`⚠️ ${p.lockFailed} khóa lỗi`);
+        if (p.renameFailed)    parts.push(`❌ ${p.renameFailed} đổi tên lỗi`);
+        stats.textContent = parts.join(" · ") || "Đang xử lý...";
+    }
+}
+
+function finishApproveProgress(hasError) {
+    const box = document.getElementById("approveProgress");
+    if (!box) return;
+    box.classList.remove("has-error");
+    box.classList.add("done");
+    if (hasError) {
+        box.classList.add("has-error");
+        box.classList.remove("done");
+    }
+    if (!hasError) {
+        setTimeout(() => {
+            box.classList.remove("show");
+        }, 6000);
+    }
+}
+
+function updateSearchProgress(p) {
+    const box = document.getElementById("searchProgress");
+    if (!box) return;
+
+    const label = document.getElementById("searchProgressLabel");
+    const percent = document.getElementById("searchProgressPercent");
+    const fill = document.getElementById("searchProgressFill");
+    const stats = document.getElementById("searchProgressStats");
+
+    const total = p.total || 0;
+    const done = p.doneCount || 0;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+    if (label) {
+        if (done >= total && total > 0) {
+            label.textContent = `✅ Đã quét xong toàn bộ ${total} giáo viên`;
+        } else if (p.teacherName) {
+            const toSuffix = p.toName ? ` (${p.toName})` : "";
+            label.textContent = `⏳ Đang quét ${done}/${total} giáo viên — "${p.teacherName}"${toSuffix}...`;
+        } else {
+            label.textContent = `⏳ Đang quét ${done}/${total} giáo viên...`;
+        }
+    }
+    if (percent) percent.textContent = pct + "%";
+    if (fill) fill.style.width = pct + "%";
+
+    if (stats) {
+        const parts = [];
+        if (p.okCount)  parts.push(`✅ ${p.okCount} thành công`);
+        if (p.errCount) parts.push(`❌ ${p.errCount} lỗi`);
+        if (p.currentBatch && p.totalBatches) {
+            parts.push(`📦 Đợt ${p.currentBatch}/${p.totalBatches}`);
+        }
+        stats.textContent = parts.join(" · ") || "Đang xử lý...";
+    }
+}
+
+function finishSearchProgress(hasError, totalFiles, totalTeachers, failedCount) {
+    const box = document.getElementById("searchProgress");
+    if (!box) return;
+
+    const fill = document.getElementById("searchProgressFill");
+    const percent = document.getElementById("searchProgressPercent");
+    const label = document.getElementById("searchProgressLabel");
+    const stats = document.getElementById("searchProgressStats");
+
+    if (fill) fill.style.width = "100%";
+    if (percent) percent.textContent = "100%";
+    if (label) label.textContent = hasError ? "⚠️ Đã quét xong (có lỗi)" : "✅ Đã quét xong";
+    if (stats) {
+        let s = `Tìm thấy ${totalFiles} file trong ${totalTeachers} giáo viên`;
+        if (failedCount) s += ` · ⚠️ ${failedCount} thư mục lỗi`;
+        stats.textContent = s;
+    }
+
+    box.classList.remove("has-error");
+    box.classList.add("done");
+    if (hasError) {
+        box.classList.add("has-error");
+        box.classList.remove("done");
+    }
+}
+
+async function approveTeacherWeek(teacherId, button) {
+    const group = weekApprovalGroups.get(teacherId);
+    if (!group) return;
+
+    if (group.skipped) {
+        alert("Thư mục này đang bị bỏ qua — không thể duyệt.");
+        return;
+    }
+
+    const fileIds = getGroupFileIds(group);
+    if (!fileIds.length) {
+        alert("Giáo viên này chưa có file để duyệt.");
+        return;
+    }
+
+    if (!confirm(`Duyệt ${fileIds.length} file của giáo viên "${group.name}"?\n\nTên file sẽ được thêm [ĐÃ DUYỆT].`)) return;
+
+    const oldText = button.textContent;
+    button.disabled = true;
+    button.textContent = "⏳ Đang duyệt...";
+
+    showApproveProgress();
+
+    try {
+        const weekNum = extractWeekNumber(currentApprovalWeek);
+        const result = await approveFileIds(fileIds, [teacherId], weekNum, function(p) {
+            updateApproveProgress(p);
+        });
+
+        updateApproveProgress({
+            batchIndex: 1, totalBatches: 1,
+            filesProcessed: fileIds.length, totalFiles: fileIds.length,
+            approved: result.approved, skipped: result.skipped,
+            locked: result.stats.locked, alreadyLocked: result.stats.alreadyLocked,
+            lockFailed: result.stats.lockFailed, renameFailed: result.stats.renameFailed
+        });
+
+        finishApproveProgress(result.errors.length > 0);
+
+        if (result.errors.length) {
+            alert(buildApprovalSummary(result, `"${group.name}"`));
+            button.textContent = "✓ Duyệt lại";
+            button.disabled = false;
+        } else {
+            alert(buildApprovalSummary(result, `"${group.name}"`));
+            button.textContent = "✓ Đã duyệt";
+        }
+    } catch (error) {
+        finishApproveProgress(true);
+        button.disabled = false;
+        button.textContent = oldText;
+        alert("❌ Không thể duyệt: " + (error.message || error));
+    }
+}
+
+async function approveAllWeeks(button) {
+    const fileIds = getAllWeekFileIds();
+    if (!fileIds.length) {
+        alert("Không có file nào để duyệt.");
+        return;
+    }
+
+    const teacherFolderIds = [];
+    weekApprovalGroups.forEach((group, id) => {
+        if (!group.skipped) teacherFolderIds.push(id);
+    });
+
+    if (!confirm(`Duyệt tất cả ${fileIds.length} file của tuần này?\n\nTên file sẽ được thêm [ĐÃ DUYỆT].`)) return;
+
+    const oldText = button.textContent;
+    button.disabled = true;
+    button.textContent = "⏳ Đang duyệt...";
+
+    showApproveProgress();
+
+    try {
+        const weekNum = extractWeekNumber(currentApprovalWeek);
+        const result = await approveFileIds(fileIds, teacherFolderIds, weekNum, function(p) {
+            updateApproveProgress(p);
+        });
+
+        updateApproveProgress({
+            batchIndex: 1, totalBatches: 1,
+            filesProcessed: fileIds.length, totalFiles: fileIds.length,
+            approved: result.approved, skipped: result.skipped,
+            locked: result.stats.locked, alreadyLocked: result.stats.alreadyLocked,
+            lockFailed: result.stats.lockFailed, renameFailed: result.stats.renameFailed
+        });
+
+        finishApproveProgress(result.errors.length > 0);
+
+        if (result.errors.length) {
+            alert(buildApprovalSummary(result, ""));
+            button.textContent = "✓ Duyệt lại";
+            button.disabled = false;
+        } else {
+            alert(buildApprovalSummary(result, ""));
+            button.textContent = "✓ Đã duyệt tất cả";
+        }
+    } catch (error) {
+        finishApproveProgress(true);
+        button.disabled = false;
+        button.textContent = oldText;
+        alert("❌ Không thể duyệt tất cả: " + (error.message || error));
+    }
+}
+
+async function openAll(weekNumberArg) {
+    if (!driveData) {
+        await loadDrive();
+        if (!driveData) return;
+    }
+
+    const old = document.getElementById("weekResults");
+    if (old) old.remove();
+    const box = createWeekResultsContainer();
+
+    let weekNumber;
+    if (weekNumberArg !== undefined && weekNumberArg !== null && String(weekNumberArg).trim() !== "") {
+        weekNumber = String(parseInt(String(weekNumberArg), 10));
+    } else if (selectedWeekNumber) {
+        weekNumber = String(parseInt(String(selectedWeekNumber), 10));
+    } else {
+        if (!weekInfo || weekInfo.week === "dự trữ") {
+            box.innerHTML = '<div class="empty-result">Không xác định được tuần cần tìm. Vui lòng bấm "📂 Tìm file theo tuần" và chọn số tuần.</div>';
+            return;
+        }
+        weekNumber = String(weekInfo.week).replace(/^0+/, "") || "0";
+    }
+
+    const parsedWeek = parseInt(weekNumber, 10);
+    if (isNaN(parsedWeek) || parsedWeek < 1 || parsedWeek > 40) {
+        box.innerHTML = '<div class="empty-result">Số tuần không hợp lệ. Vui lòng chọn lại từ 1 đến 40.</div>';
+        return;
+    }
+    weekNumber = String(parsedWeek);
+
+    const weekLabel = "TUẦN " + weekNumber;
+
+    const teacherList = extractTeacherList(driveData);
+    const totalTeachers = teacherList.length;
+    const treeType = (driveData && driveData.treeType) || "A";
+
+    if (totalTeachers === 0) {
+        box.innerHTML = `
+            <div class="week-results-header">
+                📂 File của ${escapeHtml(weekLabel)}
+                <div class="week-results-meta">Không tìm thấy giáo viên nào trong cây thư mục.</div>
+            </div>
+            <div class="empty-result">Không có dữ liệu.</div>
+        `;
+        return;
+    }
+
+    let scanDescription;
+    if (selectedScanMode === "range") {
+        const range = computeDateRange(weekNumber, selectedWeekBefore, selectedWeekAfter);
+        const rangeText = range
+            ? `từ ${formatDateVN(range.fromDate)} đến ${formatDateVN(range.toDate)}`
+            : "(không tìm thấy trong bảng lịch)";
+        scanDescription = `Phương án: <b>⚡ Khoảng tuần</b> (Tuần ${Math.max(1, parsedWeek - selectedWeekBefore)} → ${parsedWeek + selectedWeekAfter}, lọc ngày ${rangeText})`;
+    } else {
+        scanDescription = `Phương án: <b>🌳 Toàn bộ cây</b>`;
+    }
+
+    const treeTypeLabel = {
+        "A-direct": "Kiểu A-direct",
+        "A": "Kiểu A",
+        "B": "Kiểu B",
+        "empty": "Cây rỗng",
+        "unknown": "Không xác định"
+    }[treeType] || treeType;
+
+    box.innerHTML = `
+        <div class="week-results-header">
+            📂 File của ${escapeHtml(weekLabel)}
+            <div class="week-results-meta">
+                ${scanDescription} · <b>${treeTypeLabel}</b><br>
+                Đang quét <b>${totalTeachers}</b> giáo viên (song song ${TEACHER_CONCURRENCY})...
+            </div>
+        </div>
+        <div style="padding: 14px 16px;">
+            <div id="searchProgress" class="search-progress">
+                <div class="search-progress-info">
+                    <span id="searchProgressLabel">⏳ Đang chuẩn bị...</span>
+                    <span id="searchProgressPercent">0%</span>
+                </div>
+                <div class="search-progress-bar">
+                    <div id="searchProgressFill" class="search-progress-fill"></div>
+                </div>
+                <div id="searchProgressStats" class="search-progress-stats"></div>
+            </div>
+        </div>
+    `;
+
+    const groups = [];
+    const failedFolderIds = new Set();
+    let doneCount = 0;
+    let okCount = 0;
+    let errCount = 0;
+
+    const activeTeacherNames = new Map();
+    const totalBatches = Math.ceil(totalTeachers / TEACHER_CONCURRENCY);
+
+    const updateProgressUI = () => {
+        const activeNames = Array.from(activeTeacherNames.values());
+        let teacherLabel = "";
+        if (activeNames.length === 1) {
+            teacherLabel = activeNames[0];
+        } else if (activeNames.length > 1) {
+            teacherLabel = `${activeNames[0]} (+${activeNames.length - 1} khác)`;
+        }
+
+        const currentBatch = Math.min(
+            totalBatches,
+            Math.floor(doneCount / TEACHER_CONCURRENCY) + 1
+        );
+
+        updateSearchProgress({
+            doneCount: doneCount,
+            total: totalTeachers,
+            okCount: okCount,
+            errCount: errCount,
+            teacherName: teacherLabel,
+            currentBatch: currentBatch,
+            totalBatches: totalBatches
+        });
+    };
+    updateProgressUI();
+
+    async function scanOneTeacher(teacher) {
+        activeTeacherNames.set(teacher.id, teacher.name);
+        updateProgressUI();
+
+        try {
+            const data = await api(teacher.id, "week", weekNumber);
+            const group = {
+                id: (data && data.id) || teacher.id,
+                name: (data && data.name) || teacher.name,
+                url: (data && data.url) || teacher.url,
+                skipped: data && data.skipped === true,
+                folders: (data && data.folders) || [],
+                directFiles: (data && data.directFiles) || [],
+                toName: teacher.toName || null
+            };
+            groups.push(group);
+            okCount++;
+        } catch (err) {
+            errCount++;
+            failedFolderIds.add(teacher.id);
+            groups.push({
+                id: teacher.id,
+                name: teacher.name,
+                url: teacher.url,
+                skipped: false,
+                folders: [],
+                directFiles: [],
+                toName: teacher.toName || null
+            });
+        } finally {
+            activeTeacherNames.delete(teacher.id);
+            doneCount++;
+            updateProgressUI();
+        }
+    }
+
+    const queue = teacherList.slice();
+    const workers = [];
+    for (let i = 0; i < Math.min(TEACHER_CONCURRENCY, queue.length); i++) {
+        workers.push((async () => {
+            while (queue.length > 0) {
+                const teacher = queue.shift();
+                if (!teacher) break;
+                await scanOneTeacher(teacher);
+            }
+        })());
+    }
+    await Promise.all(workers);
+
+    const orderedGroups = groups.sort((a, b) => a.name.localeCompare(b.name, "vi"));
+
+    let totalFiles = 0;
+    orderedGroups.forEach(g => {
+        if (g.skipped) return;
+        totalFiles += (g.directFiles || []).length;
+        (g.folders || []).forEach(f => {
+            if (f.skipped) return;
+            totalFiles += (f.files || []).length;
+        });
+    });
+
+    finishSearchProgress(errCount > 0, totalFiles, totalTeachers, errCount);
+
+    renderWeekResultsGrouped(orderedGroups, totalTeachers, weekLabel, failedFolderIds);
+
+    setConnectionStatus(
+        `🟢 Đã tìm thấy ${totalFiles} file của ${escapeHtml(weekLabel)} ` +
+        `trong ${totalTeachers} giáo viên (${errCount} lỗi). Kiểu cây: ${treeTypeLabel}.`,
+        errCount > 0 ? "warning" : "success"
+    );
+}
+
+function closeAll() {
+    const resultBox = document.getElementById("weekResults");
+    if (resultBox) resultBox.remove();
+
+    document.querySelectorAll(".children").forEach(el => el.classList.remove("open"));
+    document.querySelectorAll(".toggle:not(.empty)").forEach(el => {
+        if (el.innerHTML !== "⏳") el.innerHTML = "▶";
+    });
+    hideContextMenu();
+}
+
+let searchTimeout;
+function searchTree() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const keyword = document.getElementById("search").value.toLowerCase().trim();
+        const rows = document.querySelectorAll(".tree-row");
+        if (!keyword) { rows.forEach(row => row.style.display = ""); return; }
+        rows.forEach(row => {
+            const name = (row.dataset.name || "").toLowerCase();
+            if (name.includes(keyword)) {
+                row.style.display = "flex";
+                let parent = row.parentElement;
+                while (parent) {
+                    if (parent.classList && parent.classList.contains("children")) {
+                        parent.classList.add("open");
+                        const prev = parent.previousElementSibling;
+                        if (prev) { const toggle = prev.querySelector(".toggle"); if (toggle) toggle.innerHTML = "▼"; }
+                    }
+                    parent = parent.parentElement;
+                }
+            } else row.style.display = "none";
+        });
+    }, 300);
+}
+
+function showError(message) {
+    const statusEl = document.getElementById("status");
+    if (statusEl) statusEl.innerHTML = `<div class="error">❌ ${escapeHtml(message)}</div>`;
+    document.getElementById("tree").innerHTML = `<div class="error">❌ ${escapeHtml(message)}</div>`;
+}
+
+function formatDateVN(rfc3339) {
+    try {
+        const d = new Date(rfc3339);
+        const pad = n => String(n).padStart(2, '0');
+        return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    } catch (e) {
+        return rfc3339;
+    }
+}
+
+function createSafeId(text) { return String(text).replace(/[^a-zA-Z0-9_-]/g, "_"); }
+function escapeHtml(text) { if (text === null || text === undefined) return ""; return String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;"); }
+function escapeAttribute(text) { return escapeHtml(text); }
+function escapeJs(text) { return String(text).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\r/g,"\\r").replace(/\n/g,"\\n"); }
+
+/* ============================================================
+   LONG-PRESS ĐỂ MỞ CONTEXT MENU TRÊN MOBILE
+============================================================ */
+(function initMobileLongPress() {
+    let pressTimer = null;
+    let pressTarget = null;
+    const LONG_PRESS_MS = 550;
+    const MOVE_TOLERANCE = 10;
+    let startX = 0, startY = 0;
+
+    function clearPress() {
+        if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+        pressTarget = null;
+    }
+
+    document.addEventListener("touchstart", function(e) {
+        const row = e.target.closest(".ctx-target");
+        if (!row) return;
+        if (e.touches.length !== 1) return;
+
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        pressTarget = row;
+
+        pressTimer = setTimeout(function() {
+            if (!pressTarget) return;
+            const fakeEvent = {
+                preventDefault: function() {},
+                stopPropagation: function() {},
+                clientX: startX,
+                clientY: startY
+            };
+            if (typeof showContextMenu === "function") {
+                showContextMenu(fakeEvent, pressTarget);
+                if (navigator.vibrate) navigator.vibrate(30);
+            }
+            pressTarget = null;
+            pressTimer = null;
+        }, LONG_PRESS_MS);
+    }, { passive: true });
+
+    document.addEventListener("touchmove", function(e) {
+        if (!pressTimer) return;
+        const touch = e.touches[0];
+        const dx = Math.abs(touch.clientX - startX);
+        const dy = Math.abs(touch.clientY - startY);
+        if (dx > MOVE_TOLERANCE || dy > MOVE_TOLERANCE) {
+            clearPress();
+        }
+    }, { passive: true });
+
+    document.addEventListener("touchend", clearPress, { passive: true });
+    document.addEventListener("touchcancel", clearPress, { passive: true });
+})();
+</script>
+
+<!-- ============================================================
+     XỬ LÝ NGÀY VÀ TUẦN HỌC (2026-2027)
+============================================================ -->
+<script>
+const checkDateDisplay = document.getElementById("check-date");
+if (checkDateDisplay) {
+    const now = new Date();
+    const userLabelHtml = '<span id="check-user-label"></span>';
+    checkDateDisplay.innerHTML = userLabelHtml + "Ngày kiểm tra: " + now.toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+    });
+    if (typeof applyUserToUI === "function") {
+        try { applyUserToUI(); } catch (e) {}
+    }
+}
+
+const schedule = [
+    { week: "01", start: "2026-09-07", end: "2026-09-13" },
+    { week: "02", start: "2026-09-14", end: "2026-09-20" },
+    { week: "03", start: "2026-09-21", end: "2026-09-27" },
+    { week: "04", start: "2026-09-28", end: "2026-10-04" },
+    { week: "05", start: "2026-10-05", end: "2026-10-11" },
+    { week: "06", start: "2026-10-12", end: "2026-10-18" },
+    { week: "07", start: "2026-10-19", end: "2026-10-25" },
+    { week: "08", start: "2026-10-26", end: "2026-11-01" },
+    { week: "09", start: "2026-11-02", end: "2026-11-08" },
+    { week: "10", start: "2026-11-09", end: "2026-11-15" },
+    { week: "11", start: "2026-11-16", end: "2026-11-22" },
+    { week: "12", start: "2026-11-23", end: "2026-11-29" },
+    { week: "13", start: "2026-11-30", end: "2026-12-06" },
+    { week: "14", start: "2026-12-07", end: "2026-12-13" },
+    { week: "15", start: "2026-12-14", end: "2026-12-20" },
+    { week: "16", start: "2026-12-21", end: "2026-12-27" },
+    { week: "17", start: "2026-12-28", end: "2027-01-03" },
+    { week: "18", start: "2027-01-04", end: "2027-01-10" },
+
+    { week: "dự trữ", start: "2027-01-11", end: "2027-01-17" },
+
+    { week: "19", start: "2027-01-18", end: "2027-01-24" },
+    { week: "20", start: "2027-01-25", end: "2027-01-31" },
+
+    { week: "21", start: "2027-02-01", end: "2027-02-07" },
+    { week: "21", start: "2027-02-08", end: "2027-02-14" },
+
+    { week: "22", start: "2027-02-15", end: "2027-02-21" },
+    { week: "23", start: "2027-02-22", end: "2027-02-28" },
+    { week: "24", start: "2027-03-01", end: "2027-03-07" },
+    { week: "25", start: "2027-03-08", end: "2027-03-14" },
+    { week: "26", start: "2027-03-15", end: "2027-03-21" },
+    { week: "27", start: "2027-03-22", end: "2027-03-28" },
+    { week: "28", start: "2027-03-29", end: "2027-04-04" },
+    { week: "29", start: "2027-04-05", end: "2027-04-11" },
+    { week: "30", start: "2027-04-12", end: "2027-04-18" },
+    { week: "31", start: "2027-04-19", end: "2027-04-25" },
+    { week: "32", start: "2027-04-26", end: "2027-05-02" },
+    { week: "33", start: "2027-05-03", end: "2027-05-09" },
+    { week: "34", start: "2027-05-10", end: "2027-05-16" },
+    { week: "35", start: "2027-05-17", end: "2027-05-23" },
+
+    { week: "dự trữ", start: "2027-05-24", end: "2027-05-30" }
+];
+
+function formatDate(dateStr) {
+    const parts = dateStr.split('-');
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
+
+function getCurrentWeekInfo() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let item of schedule) {
+        const startDate = new Date(item.start + 'T00:00:00');
+        const endDate = new Date(item.end + 'T23:59:59');
+
+        if (today >= startDate && today <= endDate) {
+            return { week: item.week, start: item.start, end: item.end };
+        }
+    }
+    return null;
+}
+
+const weekInfo = getCurrentWeekInfo();
+const weekDisplay = document.getElementById("current-week");
+
+if (weekInfo) {
+    let weekNumber = weekInfo.week;
+    let weekText = weekNumber === "dự trữ"
+        ? `TUẦN DỰ TRỮ (${formatDate(weekInfo.start)} - ${formatDate(weekInfo.end)}), NĂM HỌC 2026-2027`
+        : `TUẦN THỨ ${weekNumber} (${formatDate(weekInfo.start)} - ${formatDate(weekInfo.end)}), NĂM HỌC 2026-2027`;
+    weekDisplay.innerText = weekText;
+} else {
+    weekDisplay.innerText = `TUẦN THỨ 01 (07/09/2026 - 12/09/2026), NĂM HỌC 2026-2027`;
+}
+
+if (typeof initWeekInput === "function") {
+    initWeekInput();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const uEl = document.getElementById("loginUsername");
+    const pEl = document.getElementById("loginPassword");
+    if (uEl && !document.getElementById("loginOverlay").classList.contains("hidden")) {
+        uEl.focus();
+    }
+    [uEl, pEl].forEach(el => {
+        if (!el) return;
+        el.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                doLogin();
+            }
+        });
+    });
+
+    // Week modal
+    const input = document.getElementById("weekModalInput");
+    if (input) {
+        input.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                confirmWeekSelection();
+            } else if (e.key === "Escape") {
+                closeWeekModal();
+            }
+        });
+    }
+
+    if (typeof initScanModeUI === "function") {
+        initScanModeUI();
+    }
+});
+
+document.addEventListener("keydown", function(e) {
+    const overlay = document.getElementById("weekModal");
+    if (e.key === "Escape" && overlay && overlay.classList.contains("show")) {
+        closeWeekModal();
+    }
+});
+</script>
+
+</body>
+</html>
